@@ -1,5 +1,5 @@
-function W=MLEmodelsearch2(dat,R,tau,N,varargin)
-% W=MLEmodelsearch2(dat,R,tau,N,varargin)
+function W=MLEmodelsearch(dat,R,tau,N,varargin)
+% W=MLEmodelsearch(dat,R,tau,N,varargin)
 % Perform a model search for an optimal MLE fit of an EMhmm model to data.
 %
 % Output:
@@ -33,8 +33,7 @@ function W=MLEmodelsearch2(dat,R,tau,N,varargin)
 %             scaling steps. Default : [1e-3 5];
 %
 % Name-value pairs not recognized a passed on to EMhmm.MLEconverge at
-% appropriate times.
-
+% appropriate times, e.g.,
 %
 % Nwarmup   : number of initial iterations where model parameters are kept
 %             constant in order to 'burn in' the states and hidden path.
@@ -43,6 +42,35 @@ function W=MLEmodelsearch2(dat,R,tau,N,varargin)
 %             Default=false.
 % display   : Level of output. 0: no output. 1 (default): print convergence
 %             message. 2: print convergence every iteration.
+
+%% copyright notice
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% RMhmm.MLEmodelsearch
+% =========================================================================
+% 
+% Copyright (C) 2016 Martin Lindén
+% 
+% E-mail: bmelinden@gmail.com
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This program is free software: you can redistribute it and/or modify it
+% under the terms of the GNU General Public License as published by the
+% Free Software Foundation, either version 3 of the License, or any later
+% version.   
+% This program is distributed in the hope that it will be useful, but
+% WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+% Public License for more details.
+%
+%  Additional permission under GNU GPL version 3 section 7
+%  
+%  If you modify this Program, or any covered work, by linking or combining it
+%  with Matlab or any Matlab toolbox, the licensors of this Program grant you 
+%  additional permission to convey the resulting work.
+%
+% You should have received a copy of the GNU General Public License along
+% with this program. If not, see <http://www.gnu.org/licenses/>.
+%% start of actual code
+
 
 %% parameter interpretations
 % default parameter values

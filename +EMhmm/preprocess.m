@@ -1,4 +1,4 @@
-function dat=VB6_preprocess(varargin)
+function dat=preprocess(varargin)
 % dat=VB6_preprocess(runinput)
 % dat=VB6_preprocess(runinput,dim)
 % dat=VB6_preprocess(X,varX,dim)
@@ -17,10 +17,10 @@ function dat=VB6_preprocess(varargin)
 
 %% copyright notice
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% VB6_preprocess, data preprocessor in the vbSPT package
+% preprocess, data preprocessor in the EMhmm package
 % =========================================================================
 % 
-% Copyright (C) 2014 Martin Lindén
+% Copyright (C) 2016 Martin Lindén
 % 
 % E-mail: bmelinden@gmail.com
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

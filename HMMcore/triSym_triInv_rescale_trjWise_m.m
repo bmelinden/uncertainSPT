@@ -36,6 +36,36 @@ function [T0,T1,logDetA]=triSym_triInv_rescale_trjWise_m(g,f,trjOne,trjEnd,numTr
 %
 % ML 2014-11-10
 
+%% copyright notice
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% triSym_triInv_rescale_trjWise_m, partial inversion of tridiagonal matrix, 
+% part of the HMMcore package
+% =========================================================================
+% 
+% Copyright (C) 2016 Martin Lindén
+% 
+% E-mail: bmelinden@gmail.com
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This program is free software: you can redistribute it and/or modify it
+% under the terms of the GNU General Public License as published by the
+% Free Software Foundation, either version 3 of the License, or any later
+% version.   
+% This program is distributed in the hope that it will be useful, but
+% WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+% Public License for more details.
+%
+%  Additional permission under GNU GPL version 3 section 7
+%  
+%  If you modify this Program, or any covered work, by linking or combining it
+%  with Matlab or any Matlab toolbox, the licensors of this Program grant you 
+%  additional permission to convey the resulting work.
+%
+% You should have received a copy of the GNU General Public License along
+% with this program. If not, see <http://www.gnu.org/licenses/>.
+%% start of actual code
+
+
 % output variables
 Ttot=trjEnd(numTrj)-trjOne(1)+1;
 T0=zeros(Ttot,1);

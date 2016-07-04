@@ -40,8 +40,8 @@ function [x,v,s,y,ym]=VB6_diffusiveHMM_blur_detach(p0,A,pE,Ddt,tE,locErrG,dim,T,
 
 %% copyright notice
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% VB6_diffusiveHMM_blur_detach.m, simulate d-dimensional diffusion with 
-% multiple diffusion constants, part of the vbSPT package.
+% EMhmm.diffusiveHMM_blur_detach.m, simulate d-dimensional diffusion with 
+% multiple diffusion constants and random errors
 % =========================================================================
 % 
 % Copyright (C) 2015 Martin Lindén

@@ -7,6 +7,7 @@
 - create a simple HMM example
 - create a brief spot-fit example with a short movie
 - create a brief documentation: functions, and what they do
+- do I need log_likelihood_EMCCD_brute_parfor ? Or EMCCDfit.logL_EMCCD_lookup?
 
 copyright suggestion:
 %% copyright notice
