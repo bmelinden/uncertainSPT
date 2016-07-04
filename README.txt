@@ -63,15 +63,18 @@ EMhmm.diffusionPathUpdate.m	: EM iteration to update diffusive path
 EMhmm.hiddenStateUpdate.m	: EM iteration to update hidden states
 EMhmm.MLEparameterUpdate.m	: EM iteration to update parameters
 HMMcore/			: misc low-level HMM functions 
-
 HMMcore/getDwellTRJ.m 		: extract dwell times etc from segmented 
 				  hidden state trajectory
 ----------------------------------------------------------------------
-Installation: put the uncertainSPT folder and all subfiolders in the
-matlab path, e.g.
+Installation: 
+1) put the uncertainSPT folder and all subfiolders in the matlab path, e.g.
 > cd path-to-uncertainSPT
 > addpath(genpath(pwd))
-(consult the Matlab documentation for ways to make it permanent).
+Consult the Matlab documentation for ways to add the paths permanently.
+
+2) recompile the HMMcore binaries:
+> cd path-to-uncertainSPT/HMMcore
+> compile_code
 ---------------------------------------------------------------------
 Release history
 
