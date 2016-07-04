@@ -1,5 +1,5 @@
-function xEst=MLEpositionEstimate(W,dat)
-% xEst=MLEpositionEstimate(W,dat)
+function xEst=positionEstimate(W,dat)
+% xEst=positionEstimate(W,dat)
 % Estimate actual positions (posterior mean position) based on input data
 % and converge HMM model.
 %
@@ -7,7 +7,7 @@ function xEst=MLEpositionEstimate(W,dat)
 
 %% copyright notice
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% RMhmm.MLEpositionEstimate, variational diffusive HMM, postion estimator
+% EMhmm.positionEstimate, variational diffusive HMM, postion estimator
 % =========================================================================
 % 
 % Copyright (C) 2016 Martin Lindén
