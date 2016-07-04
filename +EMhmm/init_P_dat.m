@@ -1,5 +1,5 @@
-function W=hmmInit_P_dat(tau,R,Ddt_init,A_init,p0_init,dat)
-% W=EMhmmInit_P_dat(tau,R,Ddt_init,A_init,p0_init,dat)
+function W=init_P_dat(tau,R,Ddt_init,A_init,p0_init,dat)
+% W=EMhmm.init_P_dat(tau,R,Ddt_init,A_init,p0_init,dat)
 %
 % Initialize a diffusive HMM model with 
 % tau,R    : blur parameters

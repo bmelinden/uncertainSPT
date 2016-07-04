@@ -1,5 +1,5 @@
 /*
- * HMM_multiForwardBackward_g1.c
+ * HMM_multiForwardBackward_startend.c
  * =========================================================================
  *
  * Copyright (C) 2015 Martin Lindén, E-mail: bmelinden@gmail.com
@@ -23,9 +23,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* [lnZ,wA,pst]=HMM_multiForwardBackward_g1(Q,H,iEnd)
+/* [lnZ,wA,pst]=HMM_multiForwardBackward_startend(Q,H,iStart,iEnd)
  *
- * M.L. 2015-12-02
+ * M.L. 2015-12-15
  *
  */
 
@@ -37,7 +37,8 @@
 /* Input Arguments */
 #define	Q_IN    prhs[0]
 #define	H_IN    prhs[1]
-#define	IEND_IN prhs[2]
+#define	ISTART_IN prhs[2]
+#define	IEND_IN prhs[3]
 
 /* output arguments */
 #define	LNZ_OUT     plhs[0]
@@ -49,7 +50,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
     
     /* input parameters */
     double *H,*Q;
-    double *iEnd;
+    double *iEnd,*iStart;
     /* output parameters */
     double *lnZ,*wA,*pst;
     /* temporary variables */
@@ -70,14 +71,25 @@ void mexFunction(int nlhs, mxArray *plhs[],
     if (nlhs == 3){
         doBackward=1;doOccProb=1;}        
     
-    if (nrhs != 3)
-        mexErrMsgTxt("Three input arguments required.");
+    if (nrhs != 4)
+        mexErrMsgTxt("Four input arguments required.");
     
     /* size of input variables */
     T = mxGetM(H_IN); /* number of rows    */
     N = mxGetN(H_IN); /* number of columns */
     /* printf("input H is [ %d %d ] \n",T,N); */
     
+    /* require iStart to be a 1 x N matrix */
+    Mends = mxGetM(ISTART_IN); /* number of rows */
+    Nends = mxGetN(ISTART_IN); /* number of rows */
+    /* printf("input iStart is [ %d %d ] \n",Mends,Nends); */
+    if( (Mends==1) && (Nends >=1) ){ /* then do nothing */
+    }else if( (Nends == 1) && (Mends >=1) ){ /* a N x 1 is also OK */
+        Nends=Mends;
+        Mends=1;
+    }else{ /*something weird going on */
+        mexErrMsgTxt("iStart must be a 1-by-N or N-by-1 matrix.");
+    }
     /* require iEnd to be a 1 x N matrix */
     Mends = mxGetM(IEND_IN); /* number of rows */
     Nends = mxGetN(IEND_IN); /* number of rows */
@@ -93,6 +105,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
     /* retrieve input data */
     H=mxGetPr(H_IN);
     Q=mxGetPr(Q_IN);
+    iStart=mxGetPr(ISTART_IN);
     iEnd=mxGetPr(IEND_IN);
     /* check H and Q have consistent sizes */
     if ( mxGetM(Q_IN) != N || mxGetN(Q_IN) != N)
@@ -123,8 +136,8 @@ void mexFunction(int nlhs, mxArray *plhs[],
     P=mxGetPr(mx_P);
     
     /* actual forward-backward sweeps */
-    tStart=0;
     for(n=0;n<Nends;n++){
+        tStart=(int)(iStart[n]-1);
         tEnd=(int)(iEnd[n]);
         
         /* forward sweep */
@@ -188,37 +201,24 @@ void mexFunction(int nlhs, mxArray *plhs[],
                     }
                 }
             }
-        }
-        tStart=tEnd+1; /* This +1 is where the gap is created! */
-    }
-    
-    /* do occupation probability if asked for */
-    if(doOccProb>0){
-        /* pst = rowNormalize(alpha.*beta);*/
-        for(t=0;t<T*N;t++){
-            pst[t]=alpha[t]*beta[t];
-        }
-
-        for(t=0;t<T;t++){
-            ZW=0.0;
-            for(j=0;j<N;j++){
-                ZW=ZW+pst[t+j*T];
-            }
-            for(j=0;j<N;j++){
-                pst[t+j*T]=pst[t+j*T]/ZW;
-            }
-        } 
-        /* pst(iEnd+1,:)=0; % set gaps to zero */
-        for(n=0;n<Nends;n++){
-            t=(int)(iEnd[n]);
-            for(j=0;j<N;j++){
-                pst[t+j*T]=0;
+            /* do occupation probability if asked for */
+            if(doOccProb>0){
+                /* pst = rowNormalize(alpha.*beta); 
+                 * But only for the given index ranges.*/
+                for(t=tStart;t<tEnd;t++){
+                    ZW=0.0;
+                    for(j=0;j<N;j++){
+                        pst[t+j*T]=alpha[t+j*T]*beta[t+j*T];
+                        ZW=ZW+pst[t+j*T];
+                    }
+                    for(j=0;j<N;j++){
+                        pst[t+j*T]=pst[t+j*T]/ZW;
+                    }
+                }
             }
         }
-    }
-    
-    
-    /* destroy temporary vriables */
+    }    
+    /* destroy temporary variables */
     mxDestroyArray(mx_alpha);
     mxDestroyArray(mx_beta);
     mxDestroyArray(mx_P);

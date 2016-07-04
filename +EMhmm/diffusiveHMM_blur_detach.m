@@ -1,5 +1,5 @@
-function [x,v,s,y,ym]=VB6_diffusiveHMM_blur_detach(p0,A,pE,Ddt,tE,locErrG,dim,T,numTrj,pM)
-% [x,v,s,y]=VB6_diffusiveHMM_blur_detach(p0,A,pE,Ddt,tE,locErrG,dim,T,numTrj,pM)
+function [x,v,s,y,ym]=diffusiveHMM_blur_detach(p0,A,pE,Ddt,tE,locErrG,dim,T,numTrj,pM)
+% [x,v,s,y]=EMhmm.diffusiveHMM_blur_detach(p0,A,pE,Ddt,tE,locErrG,dim,T,numTrj,pM)
 %
 % Simulate diffusive HMM data. 
 % x(t,:)  : measured positions
@@ -70,7 +70,7 @@ function [x,v,s,y,ym]=VB6_diffusiveHMM_blur_detach(p0,A,pE,Ddt,tE,locErrG,dim,T,
 %% parameter handling
 [N,NN]=size(A);
 if(N~=NN)
-    error('VB6_diffusiveHMM_blur_detach requires square transition matrix')
+    error('EMhmm.diffusiveHMM_blur_detach requires square transition matrix')
 end
 clear NN
 
@@ -150,6 +150,7 @@ for m=1:numTrj
             sqrt(2*Ddt(S)*(tau*(1-tau)-R));
     end
     % and localization noise
+    X=zeros(size(YM));
     for k=1:dim
         X(:,k)=YM(:,k)+randn(Ttrj,1).*dX(:,k);
     end

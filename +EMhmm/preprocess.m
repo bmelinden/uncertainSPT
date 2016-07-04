@@ -1,23 +1,24 @@
 function dat=preprocess(varargin)
-% dat=VB6_preprocess(runinput)
-% dat=VB6_preprocess(runinput,dim)
-% dat=VB6_preprocess(X,varX,dim)
-% dat=VB6_preprocess(X,varX,dim,misc)
+% dat=EMhmm.preprocess(runinput)
+% dat=EMhmm.preprocess(runinput,dim)
+% dat=EMhmm.preprocess(X,varX,dim)
+% dat=EMhmm.preprocess(X,varX,dim,misc)
 %
-% Assemble single particle diffusion data in a form suitable for vb2SPT
-% analysis
-% runinput  : a vb2SPT runinput file, or a vb2SPT runinput structure
+% Assemble single particle diffusion data for diffusive HMM analysis
+% runinput  : a runinput file or runinput structure. This functionality is
+% not part of the EMhmm package.
 % dim       : number of data dimensions (x,y,z,...)
 % X         : cell vector of position trajectories, or single trajectory
 % varX      : cell vector of position uncertainties (posterior variances),
 %             or a vector of such variances.
 % misc      : cell vector of some other field one would like to keep track
-%             of.
+%             of. The row elements of each cell element are organized in
+%             the same way as the positions, for easy comparison.
 % ML 2016-05-13
 
 %% copyright notice
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% preprocess, data preprocessor in the EMhmm package
+% preprocess, data preprocessor for diffusive HMM analysis
 % =========================================================================
 % 
 % Copyright (C) 2016 Martin Lindén
