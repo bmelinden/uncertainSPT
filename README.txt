@@ -36,8 +36,18 @@ individual files.
 ---------------------------------------------------------------------
 EMCCDfit contents
 ---------------------------------------------------------------------
-
-
+localization_example.m  : example of spot localization
+logL_EMCCD_lookup.m     : a lookup-table object for EMCCD noise
+logL_psf.m              : a likelihood object that combines a camera noise 
+                          model, a psf model, and an image
+psf_diff_symgauss.m     : symmetric Gaussian PSF model
+psf_diff_asymgauss_angle.m : asymmetric Gaussian PSF model, parameterized 
+                             by 2 principal PSF widths and a rotation angle
+log_likelihood_EMCCD_brute_parfor.m : Numerically compute EMCCD noise 
+log_likelihood_EMCCD_brute_serial.m : likelihood, high gain approximation
+ROItransform.m          : handle transformations in and out of subimages
+ML_loadStack2.m         : read a tif stack
+skewGauss_logPdf.m      : skew-normal probability density function
 ---------------------------------------------------------------------
 EMhmm contents
 ---------------------------------------------------------------------
