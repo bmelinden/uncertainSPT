@@ -11,8 +11,8 @@ function [W,sMaxP,sVit]=MLEconverge(W,dat,varargin)
 % output arguments.
 %
 % Input :
-% W     : EM6 HMM model struct, e.g., created by EMhmm.EMhmmInit_P_dat
-% dat   : EM6 data struct, e.g., from VB6_preprocess
+% W     : EM6 HMM model struct, e.g., created by EMhmm.init_P_dat
+% dat   : EM6 data struct, e.g., from EMhmm.preprocess
 % optional arguments in the form 'name', value
 % Nwarmup   : number of initial iterations where model parameters are kept
 %             constant in order to 'burn in' the states and hidden path.

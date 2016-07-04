@@ -90,7 +90,7 @@ for k=1:length(X)
     T(k)=size(X{k},1);
 end
 if(~isempty(find(T<2,1)))
-   warning('VB6_preprocess: data contains traces with no steps. FIX!')
+   warning('EMhmm.preprocess: data contains traces with no steps. FIX!')
 end
 % data stacking: pack a zero-row between every trajectory to match sizes of
 % data x(t) and diffusive path y(t).
@@ -112,7 +112,7 @@ for k=1:length(X)
     Tx=size(x,1);
     % a sanity check: v>0
     if(~isempty(find(isfinite(v(:)).*(v(:)<=0))))
-       error(['VB6_preprocess found variance<=0 in trj ' int2str(k) ])
+       error(['EMhmm.preprocess found variance<=0 in trj ' int2str(k) ])
     end    
     dat.one(k)=ind;
     dat.end(k)=ind+Tx-1;

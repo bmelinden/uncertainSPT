@@ -76,7 +76,7 @@ for t=1:length(W.one)
         %lnH(indO,j)=lnH(indO,j)-0.5*sum(log(vtk_blj)+dx2tk./vtk_blj,2);
         blvm1j=beta*W.P.lambda(j)./dat.v(indO,:); 
         lnH(indO,j)=lnH(indO,j)-0.5*sum(log1p(blvm1j)+dx2tk./vtk_blj,2);
-        if(~isempty(find(~isfinite(lnH(:,j)),1)))
+        if(~isempty(find(isnan(lnH(:,j)),1)))
            error('NaN is lnH!') 
         end
     end

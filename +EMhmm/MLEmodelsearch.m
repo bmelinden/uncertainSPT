@@ -9,7 +9,7 @@ function W=MLEmodelsearch(dat,R,tau,N,varargin)
 % sVit  : most likely trajectory of hidden states (from Viterbi algorithm)
 %
 % Input :
-% dat   : EM6 data struct, e.g., from VB6_preprocess
+% dat   : EMhmm data struct, e.g., from EMhmm.preprocess
 % R,tau : blur factors for dat
 % N     : number of hidden states
 % additional arguments in the form of 'name', value pairs
@@ -159,7 +159,7 @@ for n=1:restarts
     Ddt_init=Ddt_init(1:2:end); % some spread between diffusion constants    
     % simple MLE convergence    
     tconv=tic;
-    Wmle{n}=EMhmm.hmmInit_P_dat(tau,R,Ddt_init,A_init,p0_init,dat);   
+    Wmle{n}=EMhmm.init_P_dat(tau,R,Ddt_init,A_init,p0_init,dat);   
     disp(['converging MLE model ' int2str(n)])% ' of ' int2str(restarts) ])
     W0=Wmle{n};
     Wmle{n}=EMhmm.MLEconverge(Wmle{n},dat,MLEargs{:});
@@ -168,7 +168,7 @@ for n=1:restarts
     Wmle{n}.modSearch='mle rnd init';
     % initial guess based on no-blur-fit
     tic
-    Wnb{n}=EMhmm.hmmInit_P_dat(0,0,Ddt_init,A_init,p0_init,dat0);    
+    Wnb{n}=EMhmm.init_P_dat(0,0,Ddt_init,A_init,p0_init,dat0);    
     Wnb{n}=EMhmm.MLEconverge(Wnb{n},dat0,MLEargs{:});
 end
 % best MLE fit

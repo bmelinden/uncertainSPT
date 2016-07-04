@@ -13,7 +13,7 @@ function W=init_P_dat(tau,R,Ddt_init,A_init,p0_init,dat)
 
 %% copyright notice
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% EMhmm.hmmInit_P_dat, initialize variational diffusive HMM
+% EMhmm.init_P_dat, initialize variational diffusive HMM
 % =========================================================================
 % 
 % Copyright (C) 2016 Martin Lindén
