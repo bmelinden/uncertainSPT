@@ -1,14 +1,22 @@
 ---------------------------------------------------------------------
 uncertainSPT
 ---------------------------------------------------------------------
-Uncertain SPT contains two software tools to extract and use
+uncertainSPT contains two basic software tools to extract and use
 localization uncertainty for single particle tracking and localization
 microscopy.
-1) EMCCDfit, a localization algorithm to estimate particle positions
-and from images aquired by an EMCCD camera, and
+1) EMCCDfit, localization algorithms to estimate particle positions
+and localization uncertainty from images aquired by an EMCCD camera,
+and
 2) EMhmm, a variational EM algorithm that performs maximum likelihood
-(ML) inference in a diffusive hidden Markov model, which accounts for
-motion blur and localization uncertainty.
+inference in a diffusive hidden Markov model, where both motion blur
+and localization uncertainty are included in the model, through an
+extension of the Berlund model for single-state diffusion [1].
+
+The code runs on matlab, with some inner loops implemented in
+C/C++. Binaries for 64 bit linux and max OS are included.
+
+1. Berglund, A.J. (2010). Statistics of camera-based single-particle
+tracking. Phys. Rev. E 82, 11917. doi: 10.1103/PhysRevE.82.011917
 ======================================================================
 Copyright (C) 2016 Martin Lindén and Johan Elf
 
