@@ -2,8 +2,8 @@
 uncertainSPT
 ---------------------------------------------------------------------
 Uncertain SPT contains two software tools to extract and use
-localization uncertainty for localization microscopy and single
-particle tracking.
+localization uncertainty for single particle tracking and localization
+microscopy.
 1) EMCCDfit, a localization algorithm to estimate particle positions
 and from images aquired by an EMCCD camera, and
 2) EMhmm, a variational EM algorithm that performs maximum likelihood
