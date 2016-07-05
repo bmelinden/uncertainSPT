@@ -80,7 +80,7 @@ Installation:
 > addpath(genpath(pwd))
 Consult the Matlab documentation for ways to add the paths permanently.
 
-2) recompile the HMMcore binaries:
+2) recompile the HMMcore binaries if needed:
 > cd path-to-uncertainSPT/HMMcore
 > compile_code
 ---------------------------------------------------------------------
