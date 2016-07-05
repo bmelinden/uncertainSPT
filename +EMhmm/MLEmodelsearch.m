@@ -132,7 +132,7 @@ while(nv <= length(varargin))
        scaleMin=pval(1);
        scaleSteps=pval(2);
    else
-       disp(['Passing unrecognized option ' pname ' to MLEconverge.'])
+       disp(['Passing option ' pname ' to MLEconverge.'])
        MLEargs{end+1}=pname;
        MLEargs{end+1}=pval;
    end   
