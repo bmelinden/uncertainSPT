@@ -86,8 +86,6 @@ Consult the Matlab documentation for ways to add the paths permanently.
 ---------------------------------------------------------------------
 Release history
 
-v1.0  (2016-07-xx) : initial release
-
-
+v0.9  (2016-07-08) : beta release for manuscript submission
 ---------------------------------------------------------------------
 
