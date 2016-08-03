@@ -91,5 +91,6 @@ Consult the Matlab documentation for ways to add the paths permanently.
 Release history
 
 v0.9  (2016-07-08) : beta release for manuscript submission
+v0.9.1(2016-08-03) : fixed repo error to include +EMCCDfit/ files
 ---------------------------------------------------------------------
 
