@@ -30,14 +30,17 @@ be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
 of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 General Public License for more details.
 
-If you use this code, please cite XXX.
-
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 This product includes code developed by Jan-Willem van de Meent (in
 external/), and Fredrik Persson (in +EMCCDfit/), see copyright in
 individual files.
+
+If you use this code, please cite our work:
+Certain uncertainty: using pointwise error estimates in
+super-resolution microscopy, Martin Lindén, Vladimir Ćurić, Elias
+Amselem, Johan Elf, e-print: arXiv:1607.04675 [physics.bio-ph]
 =====================================================================
 ---------------------------------------------------------------------
 EMCCDfit contents
