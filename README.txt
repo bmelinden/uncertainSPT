@@ -15,8 +15,14 @@ extension of the Berlund model for single-state diffusion [1].
 The code runs on matlab, with some inner loops implemented in
 C/C++. Binaries for 64 bit linux and max OS are included.
 
+If you use this code, please cite our work [2].
+
 1. Berglund, A.J. (2010). Statistics of camera-based single-particle
 tracking. Phys. Rev. E 82, 11917. doi: 10.1103/PhysRevE.82.011917
+
+2. Certain uncertainty: using pointwise error estimates in
+super-resolution microscopy, Martin Lindén, Vladimir Ćurić, Elias
+Amselem, Johan Elf, e-print: arXiv:1607.04675 [physics.bio-ph]
 ======================================================================
 Copyright (C) 2016 Martin Lindén and Johan Elf
 
@@ -36,11 +42,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 This product includes code developed by Jan-Willem van de Meent (in
 external/), and Fredrik Persson (in +EMCCDfit/), see copyright in
 individual files.
-
-If you use this code, please cite our work:
-Certain uncertainty: using pointwise error estimates in
-super-resolution microscopy, Martin Lindén, Vladimir Ćurić, Elias
-Amselem, Johan Elf, e-print: arXiv:1607.04675 [physics.bio-ph]
 =====================================================================
 ---------------------------------------------------------------------
 EMCCDfit contents
