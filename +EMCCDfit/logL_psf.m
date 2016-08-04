@@ -110,6 +110,7 @@ classdef logL_psf
             E=reshape(sum(E,2)*obj.W,obj.imSize(1),obj.imSize(2));
             C=reshape(obj.image,obj.imSize(1),obj.imSize(2));
         end
+        % model likelihood 
         function L=lnL(obj,p)
             % compute log-likelihood corresponding to
             % parameters p.

@@ -1,18 +1,30 @@
-function [E,dE_dmuX,dE_dmuY,dE_dlnBG,dE_dlnN,dE_dlnS]=psf_diff_symgauss(xx,yy,p)
-% [E,dE_dmuX,dE_dmuY,dE_dlnB,dE_dlnN,dE_dlnS]=psf_diff_psfGaussian(xx,yy,p)
-%
-% symmetric Gaussian PSF model and partial derivatives, parameterized by
-% p=[ muX muY lnB lnN lnS] :
+function param=psf2param_asymgauss_angle(p,param)
+% param=psf2param_asymgauss_angle(p,param)
+% asymmetric Gaussian PSF model and partial derivatives, 
+% parameterized by parameters
+% p=[ muX muY lnB lnN lnS1 lnS2 v] :
 % E = exp(lnB) + f, with 
-% f = N/2/pi/S^2*exp(-0.5*((xx-muX)/S)^2-0.5*((yy-muY)/S)^2)
+% f = N/2/pi/S1/S2*exp(-0.5*( cos(v)*(xx-muX)+sin(v)*(yy-muY))^2/S1^2
+%                      -0.5*(-sin(v)*(xx-muX)+cos(v)*(yy-muY))^2/S2^2)
 %
 % Note that this is a continuous model, so that exp(lnB) is the background
 % intensity per unit area, not per pixel. But when doing math in pixel
 % units the area per pixel is 1, and then this does not matter.
+%
+% param : input struct (optional). If given, existing fields are modofied
+% (or not) accoridng to the output.
+%
+% output: parameter struct p, with fields
+% p.background  : background intensity photons/area = exp(lnB)
+% p.amplitude   : spot amplitude (photons)          = exp(lnN)
+% p.std1        : spot principal width 1, standard deviation   = exp(lnS1)
+% p.std2        : spot principal width 2, standard deviation   = exp(lnS2)
+% p.angle       : spot orientation, = v
+% ML 2016-08-03
 
 %% copyright notice
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% EMCCDfit.psf_diff_symgauss.m, symmetric Gaussian PSF model
+% EMCCDfit.psf_diff_asymgauss.m, asymmetric Gaussian PSF model
 % =========================================================================
 % 
 % Copyright (C) 2016 Martin Lindén
@@ -37,25 +49,21 @@ function [E,dE_dmuX,dE_dmuY,dE_dlnBG,dE_dlnN,dE_dlnS]=psf_diff_symgauss(xx,yy,p)
 % You should have received a copy of the GNU General Public License along
 % with this program. If not, see <http://www.gnu.org/licenses/>.
 %% start of actual code
-
-
-muX=p(1);
-muY=p(2);
 lnB=p(3);
-N=exp(p(4));
-S2=exp(2*p(5)); % S^2
+lnN=p(4);
+lnS1=p(5);
+lnS2=p(6);
+v=p(7);
 
-NEexp=N/S2*exp(-1/2/S2*((muX-xx).^2+(muY-yy).^2))/2/pi;
+sig1=exp(lnS1);
+sig2=exp(lnS2);
 
-E=exp(lnB)+NEexp;
-
-if(nargout>1)
-    dE_dmuX =-(muX-xx).*NEexp/S2;
-    dE_dmuY =-(muY-yy).*NEexp/S2;
-    dE_dlnBG=ones(size(E))*exp(lnB);
-    dE_dlnN = NEexp;
-    dE_dlnS = NEexp.*(-2+((muX-xx).^2+(muY-yy).^2)/S2);
-    % compute parameter dependent pixel intensities for symmetric Gaussian, with derivatives
-    % ML 2015-11-17 : partial derivatives validated
+if(~exist('param','var'))
+    param=struct;
 end
-end
+param.background=exp(lnB);
+param.amplitude =exp(lnN);
+param.std1      =exp(lnS1);
+param.std2      =exp(lnS2);
+param.angle     =v;
+
