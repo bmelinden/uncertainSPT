@@ -93,6 +93,8 @@ for r=1:size(dotCoord0,1)
         disp(['rcond            = ' num2str(hessRcond)])
         disp(['fit parameters   = ' num2str(lnpMAPdot,4)])
         disp(['eig (covXY)      = ' num2str(eig(covMAP(1:2,1:2))',4)])
+        disp('prior :')
+        psfLogfPrior
         disp('--------------------------------------------------------')
         if(0)% a visual debug block to visualize data and failed fits
             figure(13)

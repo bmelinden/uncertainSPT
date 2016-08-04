@@ -33,13 +33,33 @@ psf2param_symGauss=@EMCCDfit.psf2param_symgauss;
 % prepare for using an asymmetric Gaussian PSF model
 psfFun_asymGauss=@EMCCDfit.psf_diff_asymgauss_angle;
 % fit parameters : [ muX muY lnB lnN lnS1 lnS2 v]
-psfLogPrior_asymGauss=@(xylnBNS)(...
-            -0.5*(xylnBNS(3)-lnBGmu)^2/lnBGstd^2 ... % background prior
-            +EMCCDfit.skewGauss_logPdf(mean(xylnBNS(5:5)),Smu0,Sstd0,Salpha));% ...
-            %+EMCCDfit.skewGauss_logPdf(xylnBNS(6),Smu0,Sstd0,Salpha));
-            % ad-hoc prior
 psfInit_asymGauss=[0 0 log([0.8 100 1.5 1.6]) 0]; % start with a little bit of asymmetry 
 psf2param_asymGauss=@EMCCDfit.psf2param_asymgauss_angle;
+% a coupe of different priors
+if(0) % log-skew-normal prior on both principal widths
+psfLogPrior_asymGauss=@(xylnBNS)(...
+            -0.5*(xylnBNS(3)-lnBGmu)^2/lnBGstd^2 ... % background prior
+            +EMCCDfit.skewGauss_logPdf(xylnBNS(5),Smu0,Sstd0,Salpha) ...
+            +EMCCDfit.skewGauss_logPdf(xylnBNS(6),Smu0,Sstd0,Salpha));
+elseif(0) % log-skew-normal prior on the geometric mean of the principal widthds
+psfLogPrior_asymGauss=@(xylnBNS)(...
+            -0.5*(xylnBNS(3)-lnBGmu)^2/lnBGstd^2 ... % background prior
+            +EMCCDfit.skewGauss_logPdf(mean(xylnBNS(5:6)),Smu0,Sstd0,Salpha));
+elseif(0) % log-skew-normal prior on the geometric mean of the principal 
+          % widths, and normal prior of the log of their ratio
+psfLogPrior_asymGauss=@(xylnBNS)(...
+            -0.5*(xylnBNS(3)-lnBGmu)^2/lnBGstd^2 ... % background prior
+            +EMCCDfit.skewGauss_logPdf(mean(xylnBNS(5:6)),Smu0,Sstd0,Salpha) ...
+            -0.5*(xylnBNS(5)-xylnBNS(6))^2/0.05^2);
+elseif(1) % log-skew-normal prior on the smallest principal width, and 
+          % normal prior of the log of their ratio
+          % this performs best on this dataset, but since it was manuallky
+          % tuned quite a bit, this might just be a coincidence
+psfLogPrior_asymGauss=@(xylnBNS)(...
+            -0.5*(xylnBNS(3)-lnBGmu)^2/lnBGstd^2 ... % background prior
+            +EMCCDfit.skewGauss_logPdf(min(xylnBNS(5:6)),Smu0,Sstd0,Salpha) ...
+            -0.5*(xylnBNS(5)-xylnBNS(6))^2/0.05^2);
+end
 
 % indata: this is a simulated movie, and thus we use the known true
 % positions instead of spot detection to create an initial guess
@@ -154,7 +174,6 @@ end
 fprintf('\n')
 fitTime=fitTime/Nfits; % average time to fit a single dot
 fprintf('\n')
-
 %% compute CRLB for symmetric gauss
 a=1; % doing math in pixel units
 
@@ -185,24 +204,31 @@ ylabel('Laplace uncertainty [px]')
 legend('MAP Laplace','MLE Laplace','MAP CRLB','MLE CRLB')
 title('symmetric Gauss uncertainty')
 box on
+ind=find(sqrt(xyCov_ag_MLE(:,1))<=2*a);
 
-disp('Error and uncertainties (excluding points with RMS uncert. >3 px) :')
+disp('Error and uncertainties (excluding points with est. Laplace uncert. >2 px) :')
 disp('------------------------------')
 disp('symmetric Gaussian PSF model:')
-ind=find((sqrt(xyCov_sg_MAP(:,1))<=3*a).*(sqrt(xyCov_sg_MLE(:,1))<=3*a));
+ind=find(sqrt(xyCov_sg_MAP(:,1))<=2*a);
+disp(['MAP retained: ' num2str(numel(ind)/T,4)])
 disp(['MAP RMS err.: ' num2str(sqrt(mean((coord_sg_MAP(ind,1)-emTrj_px(ind,1)).^2)),4) ' px'])
 disp(['MAP Laplace : ' num2str(sqrt(mean(xyCov_sg_MAP(ind,1))),4) ' px'])
 disp(['MAP CRLB    : ' num2str(sqrt(mean(MAPxCRLB(ind))),4) ' px'])
+disp('-')
+ind=find(sqrt(xyCov_sg_MLE(:,1))<=2*a);
+disp(['MLE retained: ' num2str(numel(ind)/T,4)])
 disp(['MLE RMS err.: ' num2str(sqrt(mean((coord_sg_MLE(ind,1)-emTrj_px(ind,1)).^2)),4) ' px'])
 disp(['MLE Laplace : ' num2str(sqrt(mean(xyCov_sg_MLE(ind,1))),4) ' px'])
 disp(['MLE CRLB    : ' num2str(sqrt(mean(MLExCRLB(ind))),4) ' px'])
 disp('------------------------------')
 disp('asymmetric Gaussian PSF model:')
-ind=find((sqrt(xyCov_ag_MAP(:,1))<=3*a).*(sqrt(xyCov_ag_MLE(:,1))<=3*a));
+ind=find(sqrt(xyCov_ag_MAP(:,1))<=2*a);
+disp(['MAP retained: ' num2str(numel(ind)/T,4)])
 disp(['MAP RMS err.: ' num2str(sqrt(mean((coord_ag_MAP(ind,1)-emTrj_px(ind,1)).^2)),4) ' px'])
 disp(['MAP Laplace : ' num2str(sqrt(mean(xyCov_ag_MAP(ind,1))),4) ' px'])
-disp(['MLE RMS err.: ' num2str(sqrt(mean((coord_ag_MAP(ind,1)-emTrj_px(ind,1)).^2)),4) ' px'])
+disp('-')
+ind=find(sqrt(xyCov_ag_MLE(:,1))<=2*a);
+disp(['MLE retained: ' num2str(numel(ind)/T,4)])
+disp(['MLE RMS err.: ' num2str(sqrt(mean((coord_ag_MLE(ind,1)-emTrj_px(ind,1)).^2)),4) ' px'])
 disp(['MLE Laplace : ' num2str(sqrt(mean(xyCov_ag_MLE(ind,1))),4) ' px'])
-%disp(['MAP CRLB    : ' num2str(sqrt(mean(MAPxCRLB(ind))),4) ' px'])
-%disp(['MLE CRLB    : ' num2str(sqrt(mean(MLExCRLB(ind))),4) ' px'])
 disp('------------------------------')
