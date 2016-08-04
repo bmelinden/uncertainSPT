@@ -36,7 +36,7 @@ psfFun_asymGauss=@EMCCDfit.psf_diff_asymgauss_angle;
 psfInit_asymGauss=[0 0 log([0.8 100 1.5 1.6]) 0]; % start with a little bit of asymmetry 
 psf2param_asymGauss=@EMCCDfit.psf2param_asymgauss_angle;
 % a coupe of different priors
-if(0) % log-skew-normal prior on both principal widths
+if(1) % log-skew-normal prior on both principal widths
 psfLogPrior_asymGauss=@(xylnBNS)(...
             -0.5*(xylnBNS(3)-lnBGmu)^2/lnBGstd^2 ... % background prior
             +EMCCDfit.skewGauss_logPdf(xylnBNS(5),Smu0,Sstd0,Salpha) ...
@@ -58,7 +58,7 @@ elseif(1) % log-skew-normal prior on the smallest principal width, and
 psfLogPrior_asymGauss=@(xylnBNS)(...
             -0.5*(xylnBNS(3)-lnBGmu)^2/lnBGstd^2 ... % background prior
             +EMCCDfit.skewGauss_logPdf(min(xylnBNS(5:6)),Smu0,Sstd0,Salpha) ...
-            -0.5*(xylnBNS(5)-xylnBNS(6))^2/0.05^2);
+            -0.5*(xylnBNS(5)-xylnBNS(6))^2/0.5^2);
 end
 
 % indata: this is a simulated movie, and thus we use the known true
