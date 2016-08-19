@@ -82,4 +82,26 @@ legend('truth','parameter init','model search','ground truth init')
 xlabel('frame')
 ylabel('D [\mum^2/2]')
 
+%% perform a simple bootstrap analysis on the 'model search' model
+Nbs=100;
+Pmle=EMhmm.parameterEstimate(W2,dt);
+BS=EMhmm.parameterBootstrap(W2,dat,Nbs,dt);
+
+f=fieldnames(Pmle);
+nc=1;
+for k=1:length(f)
+    nc=max(nc,length(f{k}));
+end
+disp('MLE parameters +- std err : ')
+for k=1:length(f)
+    P=Pmle.(f{k});
+    dP=std(BS.(f{k}),[],3);
+    for r=1:size(P,1)
+        fprintf([' %' int2str(nc) 's : '],f{k})
+        for c=1:size(P,2)
+            fprintf(' %6.3f +- %6.3f | ',P(r,c),dP(r,c))
+        end
+        fprintf('\n')
+    end
+end
 
