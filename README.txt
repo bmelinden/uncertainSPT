@@ -77,6 +77,10 @@ EMhmm.MLEparameterUpdate.m	: EM iteration to update parameters
 HMMcore/			: misc low-level HMM functions 
 HMMcore/getDwellTRJ.m 		: extract dwell times etc from segmented 
 				  hidden state trajectory
+EMhmm.parameterEstimate.m	: Extract some parameter estimates
+EMhmm.parameterBootstrap.m	: Bootstrap parameter estimates
+EMhmm.positionEstimate.m	: Display parameter+-bootstrap err
+
 ----------------------------------------------------------------------
 Installation: 
 1) put the uncertainSPT folder and all subfiolders in the matlab path, e.g.
