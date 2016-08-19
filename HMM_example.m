@@ -82,4 +82,9 @@ legend('truth','parameter init','model search','ground truth init')
 xlabel('frame')
 ylabel('D [\mum^2/2]')
 
+%% perform a simple bootstrap analysis on the 'model search' model
+Nbs=100;
+Pmle=EMhmm.parameterEstimate(W2,dt);
+BS=EMhmm.parameterBootstrap(W2,dat,Nbs,dt,true);
+EMhmm.displayParameterBootstrap(Pmle,BS);
 

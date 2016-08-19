@@ -70,8 +70,8 @@ for d=1:W.dim
 end
 
 W.Y.sig0 = dat.v;   % var(y(t))
-W.Y.sig0(W.end,:) = dat.v(W.end-1,:);   % var(y(t))
 W.Y.sig0(dat.v==inf)=mean(dat.v(isfinite(dat.v).*(dat.v>0)>0));
+W.Y.sig0(W.end,:) = dat.v(W.end-1,:);   % var(y(t))
 if(~isempty(find(~isfinite(W.Y.sig0(:)),1)))
     warning('initial guess generated non-finite position variances, possibly due to dat.v=inf at the end or beginning of trajectories.')
     W.Y.sig0(W.Y.sig0==inf)=mean(dat.v(isfinite(dat.v).*(dat.v>0)>0));
