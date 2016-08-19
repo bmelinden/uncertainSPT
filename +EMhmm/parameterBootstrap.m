@@ -1,4 +1,4 @@
-function [BS,ind] = parameterBootstrap(W,dat,Nbs,dt)
+function [BS,ind] = parameterBootstrap(W,dat,Nbs,dt,display)
 % BS = EMhmm.parameterBootstrap(W,dat,Nbs,dt)
 % Parameter bootstrap 
 %
@@ -6,6 +6,7 @@ function [BS,ind] = parameterBootstrap(W,dat,Nbs,dt)
 % dat   : data to resample
 % Nbs   : number of bootstrap resamples
 % dt    : time step for parameter estimate (optional: default 1);
+% display : if true, announce convergence of each replica (default: false)
 %
 % BS    : bootstrap struct with bootstrap parameter estiamtes. Last index
 %         is the bootstrap iteration. See EMhmm.parameterEstimate for the
@@ -44,6 +45,9 @@ function [BS,ind] = parameterBootstrap(W,dat,Nbs,dt)
 if(~exist('dt','var'))
     dt=1;
 end
+if(~exist('display','var'))
+    display=false;
+end
 
 BS=EMhmm.parameterEstimate(W,dt);
 f=fieldnames(BS);
@@ -56,11 +60,16 @@ end
 P=cell(1,Nbs);
 disp(['Converging ' int2str(Nbs) ' bootstrap replicas.'])
 parfor k=1:Nbs
+    t0=tic;
     % resample and recoverge
     [Xb,Wb,trj]=EMhmm.reorder_trj(dat,W);
     Wb=EMhmm.MLEconverge(Wb,Xb,'display',0);
     P{k}=EMhmm.parameterEstimate(Wb,dt);    
     ind(k,:)=trj;
+    %fprintf(' %d ',k)
+    if(display)
+        disp(['Converged replica ' int2str(k) ' in ' num2str(toc(t0)) ' s.'])
+    end
 end
 disp('Done.')
 for k=1:Nbs

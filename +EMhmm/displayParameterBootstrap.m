@@ -48,7 +48,7 @@ varLength=1;
 for k=1:length(f)
     varLength=max(varLength,length(f{k}));
 end
-disp('MLE parameters +- std err : ')
+disp('parameter +- bootstrap std err : ')
 floatString=[' %' int2str(ncd(1)) '.' int2str(ncd(2)) 'f +- %' int2str(ncd(1)) '.' int2str(ncd(2)) 'f | '];
 for k=1:length(f)
     P=Pmle.(f{k});
