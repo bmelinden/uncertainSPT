@@ -1,4 +1,4 @@
-function displayParameterBootstrap(Pmle,BS,ncd)
+function displayParameterBootstrap(Pmle,BS,ncd,Dscale)
 % EMhmm.displayParameterBootstrap(Pmle,BS,ncd)
 %
 % Displays parameter +- bootstrap std. err.
@@ -8,6 +8,8 @@ function displayParameterBootstrap(Pmle,BS,ncd)
 % ncd   : number of characters and decimals in numeric strings. 
 %         ncd(1) > ncd(2) is recommended. efault : ncd = [6 3], i.e., 
 %         6 characters, 3 decimal places.
+% Dscale: rescale units of step variance (e.g., Dscale=1e-6 to convert 
+%         nm^2/s to um^2/s). Default 1.
 %
 % ML 2016-08-19
  
@@ -42,6 +44,9 @@ function displayParameterBootstrap(Pmle,BS,ncd)
 if( ~exist('ncd','var') || isempty(ncd) )
     ncd=[6 3];
 end
+if( ~exist('Dscale','var') || isempty(Dscale) )
+    Dscale=1;
+end
 
 f=fieldnames(Pmle);
 varLength=1;
@@ -56,7 +61,11 @@ for k=1:length(f)
     for r=1:size(P,1)
         fprintf([' %' int2str(varLength) 's : '],f{k})
         for c=1:size(P,2)
-            fprintf(floatString,P(r,c),dP(r,c))
+            if(strcmp(f{k},'D'))
+                fprintf(floatString,P(r,c)*Dscale,dP(r,c)*Dscale)
+            else
+                fprintf(floatString,P(r,c),dP(r,c))
+            end
         end
         fprintf('\n')
     end
