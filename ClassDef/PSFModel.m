@@ -39,5 +39,6 @@ end
 % this.getInitialGuess(), etc), but have no strong feelings about it.
 
 % to use gradients: one will need to compute derivatives of the likelihood
-% (diifficult for the lookup table if they are to be exact), and also
-% supply derivatives of the priors (easy).
+% (diifficult for the lookup table if they are to be exact) in order to
+% make use of gradients in the optimization. It would speed things up quite
+% a bit I think.
