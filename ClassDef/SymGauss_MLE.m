@@ -26,8 +26,9 @@ classdef SymGauss_MLE < SymGauss
         end
         
         % compute log prior density
-        function [y] = logPrior(this,param)
+        function [y,dy] = logPrior(this,param)
            y=0;
+           dy=zeros(size(param));
         end
         
         % check that the prior parameters are correct size

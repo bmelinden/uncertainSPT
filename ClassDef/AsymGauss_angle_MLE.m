@@ -32,8 +32,9 @@ classdef AsymGauss_angle_MLE < AsymGauss_angle
         end
         
         % log prior distribution
-        function [y] = logPrior(this,param)
+        function [y,dy] = logPrior(this,param)
             y=0;
+            dy=zeros(size(param));
         end
         
         % check that the prior parameters are correct size

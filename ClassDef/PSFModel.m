@@ -20,8 +20,8 @@ classdef PSFModel
         % convert fit parameters to a struct form: this should be
         % overloaded by the subclass defining the PSF model
         outStruct = convertToOutStruct(this,inPar, inStruct)
-        [E,gradE]         = psfDensity(this,x,y,param)
-        lnL0      = logPrior(this,param)  
+        [E,gradE] = psfDensity(this,x,y,param)
+        [lnL0,dlnL0dp]= logPrior(this,param)  
         % control functions to check that an object has been properly
         % initialized
         flag      = hasValidInitialGuess(this)

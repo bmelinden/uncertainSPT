@@ -43,11 +43,13 @@ classdef AsymGauss_angle_logNormB < AsymGauss_angle
         end
         
         % log prior distribution
-        function [y] = logPrior(this,param)
+        function [y,dy] = logPrior(this,param)
            lnB=param(3);
            lnB0=this.priorParameters(1);
            lnBstd=this.priorParameters(2);           
            y = - 1/2 *(lnB - lnB0).^2./(lnBstd^2);
+           dy=zeros(size(param));
+           dy(3)=- (lnB - lnB0)./(lnBstd^2);
         end
         
         % check that the prior parameters are correct size
