@@ -9,7 +9,8 @@ function displayParameterBootstrap(Pmle,BS,ncd,Dscale)
 %         ncd(1) > ncd(2) is recommended. efault : ncd = [6 3], i.e., 
 %         6 characters, 3 decimal places.
 % Dscale: rescale units of step variance (e.g., Dscale=1e-6 to convert 
-%         nm^2/s to um^2/s). Default 1.
+%         nm^2/s to um^2/s), affects lambda and all variables ending in D.
+%         Default 1.
 %
 % ML 2016-08-19
  
@@ -61,7 +62,7 @@ for k=1:length(f)
     for r=1:size(P,1)
         fprintf([' %' int2str(varLength) 's : '],f{k})
         for c=1:size(P,2)
-            if(strcmp(f{k},'D'))
+            if(strcmp(f{k}(end),'D') || strcmp(f{k},'lambda'))
                 fprintf(floatString,P(r,c)*Dscale,dP(r,c)*Dscale)
             else
                 fprintf(floatString,P(r,c),dP(r,c))

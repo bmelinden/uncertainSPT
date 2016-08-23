@@ -1,6 +1,8 @@
-function est=parameterEstimate(W,dt)
-% est=parameterEstimate(W)
+function est=parameterEstimate(W,dt,varargin)
+% est=parameterEstimate(W,dt,...)
 % Estimate some model properties
+%
+% minimum operation:
 %
 % W     : converge HMM model struct
 % dt    : time step of the data (default: 1)
@@ -14,7 +16,12 @@ function est=parameterEstimate(W,dt)
 %             A: transition matrix
 %    dwellSteps: mean dwell time in units of time step
 %     dwellTime: mean dwell times in units of time
-% 
+%
+% option input: parameterEstimate(W,dt,'2state',Dthr) produces additional
+%               parameter estimates est.ag2_... for a coasre-grained model
+%               with a slow (D<=Dthr) and a fast (D>Dthr) state, by simply
+%               adding up the summary statistics into two groups.
+%
 % ML 2016-08-19
 
 %% copyright notice
@@ -48,29 +55,62 @@ if(~exist('dt','var'))
     dt=1;
 end
 
-% compute steady state
-b=eig(W.P.A);
-if(sum(abs(b-1)<10*eps)>1)
-    warning('Steady state possibly not unique.')
-end
-bMax=max(b);
-b2nd=max(b(b<bMax));
-if(abs(bMax-1)<10*eps && ~isempty(b2nd))
-    Nss=log(eps)/log(b2nd);
-    ASS=(W.P.A/bMax)^Nss; % this deals with the possibility that the largest eigenvalue is not exactly 1.
-    pSS=ASS(1,:);
-else
-    pSS=NaN(1,W.N);
-    warning('Steady state not found.')
+k=0;
+slowFastAggregate=false;
+while(k<nargin-2)
+    k=k+1;
+    if(strcmp(varargin{k},'2state'))
+       k=k+1;
+       Dthr=varargin{k};
+       slowFastAggregate=true;
+    else
+        error(['Argument ' varargin{k} ' not recognized.'])
+    end
 end
 
+est=struct;
 est.D = W.P.lambda/2/dt;
 est.lambda=W.P.lambda;
 est.p0= W.P.p0;
 est.pOcc=rowNormalize(sum(W.S.pst,1));
-est.pSS =pSS;
 est.A = W.P.A;
+est.pSS =steadyStateFromA(est.A);
 est.dwellSteps= 1./(1-diag(est.A)'); % mean dwell times [steps]
 est.dwellTime = dt./(1-diag(est.A)'); % mean dwell times [time units]
 
+% print and plot MLE results with thresholds
+if(slowFastAggregate)
+    iSlow=find(est.D<=Dthr);
+    iFast=find(est.D>Dthr);
 
+    est.ag2_D=[est.D(iSlow)*rowNormalize(est.pOcc(iSlow))'  est.D(iFast)*rowNormalize(est.pOcc(iFast))'];
+    est.ag2_p0=[sum(est.p0(iSlow))  sum(est.p0(iFast))  ]; 
+    est.ag2_pOcc=[sum(est.pOcc(iSlow))  sum(est.pOcc(iFast))  ];        
+    
+    wA=zeros(2,2);
+    wA(1,1)=sum(sum(W.S.wA(iSlow,iSlow)));
+    wA(1,2)=sum(sum(W.S.wA(iSlow,iFast)));
+    wA(2,1)=sum(sum(W.S.wA(iFast,iSlow)));
+    wA(2,2)=sum(sum(W.S.wA(iFast,iFast)));
+    est.ag2_A=rowNormalize(wA);
+
+    est.ag2_dwellSteps= 1./(1-diag(est.ag2_A)'); % mean dwell times [steps]
+    est.ag2_dwellTime = dt./(1-diag(est.ag2_A)'); % mean dwell times [time units]
+end
+end
+function pSS=steadyStateFromA(A)
+    b=eig(A);
+    if(sum(abs(b-1)<10*eps)>1)
+        warning('Steady state possibly not unique.')
+    end
+    bMax=max(b);
+    b2nd=max(abs(b(b<bMax)));
+    if(abs(bMax-1)<10*eps && ~isempty(b2nd))
+        Nss=ceil(log(eps)/log(b2nd));
+        ASS=(A/bMax)^Nss; % this deals with the possibility that the largest eigenvalue is not exactly 1.
+        pSS=ASS(1,:);
+    else
+        pSS=NaN(1,W.N);
+        warning('Steady state not found.')
+    end
+end

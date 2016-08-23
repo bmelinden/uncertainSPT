@@ -1,5 +1,5 @@
-function [BS,ind] = parameterBootstrap(W,dat,Nbs,dt,display)
-% BS = EMhmm.parameterBootstrap(W,dat,Nbs,dt)
+function [BS,ind] = parameterBootstrap(W,dat,Nbs,dt,display,varargin)
+% BS = EMhmm.parameterBootstrap(W,dat,Nbs,dt,args)
 % Parameter bootstrap 
 %
 % W     : input HMM model (recommend converged model)
@@ -7,6 +7,9 @@ function [BS,ind] = parameterBootstrap(W,dat,Nbs,dt,display)
 % Nbs   : number of bootstrap resamples
 % dt    : time step for parameter estimate (optional: default 1);
 % display : if true, announce convergence of each replica (default: false)
+% args  : additional arguments are passed to the parameterEstimate
+%         function, e.g., '2state',Dthr, to compute parameters of an
+%         aggregated -state model.
 %
 % BS    : bootstrap struct with bootstrap parameter estiamtes. Last index
 %         is the bootstrap iteration. See EMhmm.parameterEstimate for the
@@ -49,7 +52,12 @@ if(~exist('display','var'))
     display=false;
 end
 
-BS=EMhmm.parameterEstimate(W,dt);
+Pargs={};
+if(nargin>5) % the additional arguments are present
+    Pargs=varargin;
+end
+BS=EMhmm.parameterEstimate(W,dt,Pargs{:});
+
 f=fieldnames(BS);
 ind=zeros(Nbs,length(W.one));
 for v=1:length(f)
@@ -64,7 +72,7 @@ parfor k=1:Nbs
     % resample and recoverge
     [Xb,Wb,trj]=EMhmm.reorder_trj(dat,W);
     Wb=EMhmm.MLEconverge(Wb,Xb,'display',0);
-    P{k}=EMhmm.parameterEstimate(Wb,dt);    
+    P{k}=EMhmm.parameterEstimate(Wb,dt,Pargs{:});    
     ind(k,:)=trj;
     %fprintf(' %d ',k)
     if(display)
