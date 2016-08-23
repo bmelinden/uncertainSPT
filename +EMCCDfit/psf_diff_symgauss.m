@@ -45,6 +45,7 @@ lnB=p(3);
 N=exp(p(4));
 S2=exp(2*p(5)); % S^2
 
+% 2D Gaussian density profile
 NEexp=N/S2*exp(-1/2/S2*((muX-xx).^2+(muY-yy).^2))/2/pi;
 
 E=exp(lnB)+NEexp;

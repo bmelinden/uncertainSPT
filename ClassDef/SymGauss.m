@@ -1,51 +1,74 @@
 classdef SymGauss < PSFModel
-    
+    % symmetric Gaussian PSF model, described by parameters
+    % p = [muX muY lnB lnN lnS], and with density
+    %
+    % E = B + N/2/pi/S^2*exp(-0.5*((xx-muX)/S)^2-0.5*((yy-muY)/S)^2), where
+    % B= exp(lnB), N = exp(lnN), S = exp(lnS)
+    %
+    % Note that this is a continuous model, so that exp(lnB) is the
+    % background intensity per unit area, not per pixel. (But when doing
+    % math in pixel units the area per pixel is 1, and then this does not
+    % matter.)
+
     properties (Constant)
-        % symmetric Gaussian PSF model and partial derivatives, parameterized by
-        % parameters = [muX muY lnB lnN lnS] :
-        % E = exp(lnB) + f, with 
-        % f = N/2/pi/S^2*exp(-0.5*((xx-muX)/S)^2-0.5*((yy-muY)/S)^2)
         modelName = 'Symmetric Gaussian';
     end
+    properties
+       initialGuess=[]; 
+    end
     
-    methods
+    methods (Access = public)
         % Constructor
         function this = SymGauss(varargin)
-
+            % parse input parameters for initialGuess
+            k=0;
+            while(k < nargin)
+                k=k+1;
+                vk=varargin{k};
+                if(ischar(vk) && strcmp(vk,'initialGuess') )
+                    % then process the initial guess
+                    k=k+1;
+                    pInit=varargin{k};
+                    this.initialGuess = pInit;
+                end
+            end
+        end
+        % check that the object has a valid initial guess (correct number
+        % of parameters).
+        function flag = hasValidInitialGuess(this)
+            flag=true;
+            if(numel(this.initialGuess) ~=5)
+                flag=false;
+            end
         end
         
-        function [E,dE_dmuX,dE_dmuY,dE_dlnBG,dE_dlnN,dE_dlnS] = runModel(this, xx, yy, param)
+        % PSFmodel functions in this class level
+        function [E,dEdp]= psfDensity(this, xx, yy, param)
             
-            [muX, muY, lnB, N, S2] = translateFitParameters(param);
-            
-            NEexp=N/S2*exp(-1/2/S2*((muX-xx).^2+(muY-yy).^2))/2/pi;
-
-            E=exp(lnB)+NEexp;
+            [muX, muY, B, N, S] = this.translateFitParameters(param);
+            S2=S^2;            
+            NEexp=N/S2/2/pi*exp(-1/2/S2*((muX-xx).^2+(muY-yy).^2));
+            E=B+NEexp;
 
             if(nargout>1)
-                dE_dmuX =-(muX-xx).*NEexp/S2;
-                dE_dmuY =-(muY-yy).*NEexp/S2;
-                dE_dlnBG=ones(size(E))*exp(lnB);
-                dE_dlnN = NEexp;
-                dE_dlnS = NEexp.*(-2+((muX-xx).^2+(muY-yy).^2)/S2);
+                dEdp=zeros(size(E,1),size(E,2),5);
+                dEdp(:,:,1)=-(muX-xx).*NEexp/S2; % dE_dmuX 
+                dEdp(:,:,2)=-(muY-yy).*NEexp/S2; % dE_dmuY 
+                dEdp(:,:,3)=ones(size(E))*B; % dE_dlnBG
+                dEdp(:,:,4)= NEexp; % dE_dlnN 
+                dEdp(:,:,5)= NEexp.*(-2+((muX-xx).^2+(muY-yy).^2)/S2); % dE_dlnS 
                 % compute parameter dependent pixel intensities for symmetric Gaussian, with derivatives
                 % ML 2015-11-17 : partial derivatives validated
             end
         end
         
-        function [outStruct] = convertToOutStruct(this, inStruct, inPar)
-            % Convert psf fit parameters to parameter struct, using a symmetric
-            % Gaussian PSF model, parameterized by 
-            % p=[ muX muY lnB lnN lnS] :
-            % E = exp(lnB) + f, with 
-            % f = N/2/pi/S^2*exp(-0.5*((xx-muX)/S)^2-0.5*((yy-muY)/S)^2)
+        function outStruct = convertToOutStruct(this,inPar, inStruct)
+            % Convert psf fit parameters to a nice-looking parameter
+            % struct
             %
-            % Note that this is a continuous model, so that exp(lnB) is the background
-            % intensity per unit area, not per pixel. But when doing math in pixel
-            % units the area per pixel is 1, and then this does not matter.
-            %
-            % If no inPar input, the currently stored values for the
-            % parameters are returned.
+            % inPar     : parameter vector to convert.
+            % inStruct  : struct to which parameter fields are (give an
+            %             empty struct if no struct is at hand).
             %
             % output: parameter struct outStruct, with fields
             % outStruct.background  : background intensity photons/area = exp(lnB)
@@ -53,20 +76,22 @@ classdef SymGauss < PSFModel
             % outStruct.std         : spot width, stdandard deviation   = exp(lnS)
             
             outStruct = inStruct;
+            [~, ~, B, N, S] = this.translateFitParameters(inPar);
             
-            outStruct.background=exp(inPar(3));
-            outStruct.amplitude =exp(inPar(4));
-            outStruct.std       =exp(inPar(5));
-        end
-        
-        function [muX, muY, lnB, N, S2] = translateFitParameters(this, param)
+            outStruct.background=B;
+            outStruct.amplitude =N;
+            outStruct.std       =S;
+        end        
+    end
+    % protected methods
+    methods (Access = protected)
+        function [muX, muY, B, N, S] = translateFitParameters(~,param)
             muX=param(1);
             muY=param(2);
-            lnB=param(3);
+            B=exp(param(3));
             N=exp(param(4));
-            S2=exp(2*param(5)); % S^2
+            S=exp(param(5)); % S
         end
         
-    end
-    
+    end    
 end
