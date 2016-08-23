@@ -83,8 +83,12 @@ xlabel('frame')
 ylabel('D [\mum^2/2]')
 
 %% perform a simple bootstrap analysis on the 'model search' model
+% add parameter estimates from a simple 2-state coarse-graining based on
+% the diffusion threshold 1e6 nm^2/s.
 Nbs=100;
 Pmle=EMhmm.parameterEstimate(W2,dt,'2state',1e6);
 BS=EMhmm.parameterBootstrap(W2,dat,Nbs,dt,true,'2state',1e6);
+% for the display, rescale D and lambda by *1e-6 to produce convenient
+% numbers
 EMhmm.displayParameterBootstrap(Pmle,BS,[],1e-6);
 
