@@ -1,14 +1,13 @@
-classdef PSFModel
+classdef (Abstract) PSFModel 
     % PSFmodel_subclass('initialGuess',pInit,'priorParameters',p0param)
     %
-    % Abstract superclass for PSF model objects. All subclasses are
+    % Abstract superclass for PSF model objects. All subclasses are to be 
     % initialized with the above syntax (and simply pass the constructor
     % arguments on upwards), but the density function, prior distribution,
     % and some helper functions need to be defined in supclasses.
     % Suggested structure: subclasses define the PSF model and parameters,
     % and different subclasses of these define prior distributions.
-    %
-    properties (Abstract, Constant) % 
+    properties (Abstract, Constant)
         modelName;
         priorName;
     end
@@ -16,24 +15,35 @@ classdef PSFModel
         initialGuess;
         priorParameters;
     end
+    methods 
+        function this=PSFModel(varargin)
+            for n=1:2:nargin
+                this.(varargin{n})=varargin{n+1};
+            end
+        end
+    end
     methods (Abstract, Access = public)
         % convert fit parameters to a struct form: this should be
         % overloaded by the subclass defining the PSF model
         outStruct = convertToOutStruct(this,inPar, inStruct)
         [E,gradE] = psfDensity(this,x,y,param)
         [lnL0,dlnL0dp]= logPrior(this,param)  
-        % control functions to check that an object has been properly
-        % initialized
-        flag      = hasValidInitialGuess(this)
-        flag      = hasValidPrior(this)
     end
 end
+
+% overwrite +EMCCDfit/logL_psf.m with ClassDef/logL_psf2.m and update
+% syntax in various places
+
+% create a +PSF library with a +PSF/
+
+% example using refineSingleFrame
 
 % ML thought 1: should perhaps the convertToOutStruct method also do some
 % unit conversion, for example rescale the length unit to ,e.g., nm? 
 % In that case, a scaling factor has to be supplied somehow. I would
 % suggest as a construction argument, since the user presumably knows what
-% units fitting will be done in, and what units one wants the final answer to be
+% units fitting will be done in, and what units one wants the final answer
+% to be.
 
 % ML though 2: I did not set up access functions (e.g.
 % this.getInitialGuess(), etc), but have no strong feelings about it.

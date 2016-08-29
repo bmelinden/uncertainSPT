@@ -1,4 +1,4 @@
-classdef AsymGauss_angle < PSFModel
+classdef AsymGauss_angle < PSF.PSFModel
     % Asymmetric Gaussian PSF model described by parameters
     % p=[ muX muY lnB lnN lnS1 lnS2 v], and with density
     %
@@ -11,12 +11,12 @@ classdef AsymGauss_angle < PSFModel
     % the parameters.
     %
     % Note that this is a continuous model, so that exp(lnB) is the
-    % background intensity per unit area, not per pixel. (But when doing
-    % math in pixel units the area per pixel is 1, and then this does not
-    % matter.)
+    % background intensity per unit area, not per pixel. (However, when
+    % doing math in pixel units the area per pixel is 1, and then this does
+    % not matter.)
     
     properties (Constant)
-        modelName = 'Asymmetric Gaussian, std,angle parameterization';
+        modelName = 'Asymmetric Gaussian, std12,angle parameterization';
     end
     properties
         initialGuess=[];
@@ -25,24 +25,10 @@ classdef AsymGauss_angle < PSFModel
         % Constructor, requires a name-value pair
         % 'initialGuess',[ muX muY lnB lnN lnS1 lnS2 v ]
         function this= AsymGauss_angle(varargin)
-            k=0;
-            while(k < nargin)
-                k=k+1;
-                vk=varargin{k};
-                if(ischar(vk) && strcmp(vk,'initialGuess') )
-                    % then process the initial guess
-                    k=k+1;
-                    pInit=varargin{k};
-                    this.initialGuess = pInit;
-                end
-            end
-        end
-        
-        % check that the object has a valid initial guess
-        function flag      = hasValidInitialGuess(this)
-            flag=true;
-            if( numel(this.initialGuess) ~= 7 )
-                flag=false;
+            this@PSF.PSFModel(varargin{:});
+            % sanity check for initialGuess
+            if(numel(this.initialGuess)~=7)
+                error('AsymGauss_angle needs 7 initialGuess elements')
             end
         end
         
@@ -107,7 +93,7 @@ classdef AsymGauss_angle < PSFModel
             v=inPar(7);
             
             % make the angle refer to the largest principal direction?
-            %%% TBA
+            %%% ML: good idea, but leave for later
             
             outStruct.background=B;
             outStruct.amplitude =N;

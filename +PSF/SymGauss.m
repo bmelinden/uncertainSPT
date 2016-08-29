@@ -1,9 +1,10 @@
-classdef SymGauss < PSFModel
+classdef SymGauss < PSF.PSFModel
     % symmetric Gaussian PSF model, described by parameters
     % p = [muX muY lnB lnN lnS], and with density
     %
-    % E = B + N/2/pi/S^2*exp(-0.5*((xx-muX)/S)^2-0.5*((yy-muY)/S)^2), where
-    % B= exp(lnB), N = exp(lnN), S = exp(lnS)
+    % E = B + N/2/pi/S^2*exp(-0.5*((xx-muX)/S)^2-0.5*((yy-muY)/S)^2), 
+    %
+    % where B= exp(lnB), N = exp(lnN), S = exp(lnS).
     %
     % Note that this is a continuous model, so that exp(lnB) is the
     % background intensity per unit area, not per pixel. (But when doing
@@ -20,28 +21,12 @@ classdef SymGauss < PSFModel
     methods (Access = public)
         % Constructor
         function this = SymGauss(varargin)
-            % parse input parameters for initialGuess
-            k=0;
-            while(k < nargin)
-                k=k+1;
-                vk=varargin{k};
-                if(ischar(vk) && strcmp(vk,'initialGuess') )
-                    % then process the initial guess
-                    k=k+1;
-                    pInit=varargin{k};
-                    this.initialGuess = pInit;
-                end
+            this@PSF.PSFModel(varargin{:});
+            % sanity check for initialGuess
+            if(numel(this.initialGuess)~=5)
+                error('SymGauss needs 5 initialGuess elements')
             end
         end
-        % check that the object has a valid initial guess (correct number
-        % of parameters).
-        function flag = hasValidInitialGuess(this)
-            flag=true;
-            if(numel(this.initialGuess) ~=5)
-                flag=false;
-            end
-        end
-        
         % PSFmodel functions in this class level
         function [E,dEdp]= psfDensity(this, xx, yy, param)
             
@@ -90,7 +75,7 @@ classdef SymGauss < PSFModel
             muY=param(2);
             B=exp(param(3));
             N=exp(param(4));
-            S=exp(param(5)); % S
+            S=exp(param(5));
         end
         
     end    

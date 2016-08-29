@@ -1,4 +1,4 @@
-classdef AsymGauss_angle_logNormB < AsymGauss_angle
+classdef AsymGauss_angle_logNormB < PSF.AsymGauss_angle
     % An asymmetric Gaussian PSF model (see AsymGauss_angle) where the
     % background  intensity B has a log-normal prior (or log(B) is Normal)
     % with location parameter lnB0 and scale parameter lnBstd, which means
@@ -21,24 +21,13 @@ classdef AsymGauss_angle_logNormB < AsymGauss_angle
         % Constructor
         function this = AsymGauss_angle_logNormB(varargin)
             % call superclass constructor
-            this@AsymGauss_angle(varargin{:});
-            % parse parametes for priorParameters
-            k=0;
-            while(k < nargin)
-                k=k+1;
-                vk=varargin{k};
-                if(ischar(vk) && strcmp(vk,'priorParameters') )
-                    % then store the prior parameters
-                    k=k+1;
-                    this.priorParameters = varargin{k};
-                end
+            this@PSF.AsymGauss_angle(varargin{:});
+            % sanity check on prior parameters
+            if(numel(this.priorParameters)~=2)
+                error('PSF.AsymGauss_angle needs priorParameters=[lnB0 lnBstd]')
             end
-            % check validity of the model
-            if( ~this.hasValidInitialGuess() || ~this.hasValidPrior())
-                disp('AsymGauss_angle_logNormB constructor args:')
-                varargin{:} %#ok<NOPRT>
-                this %#ok<NOPRT>
-                error('AsymGauss_angle_logNormB not correctly set up.')
+            if(this.priorParameters(2) <=0 )
+                error('PSF.AsymGauss_angle needs lnBstd >0')
             end
         end
         
