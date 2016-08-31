@@ -54,9 +54,17 @@ MAPxyCov=zeros(T,4);
 MLEcoord=zeros(T,3);
 MLEbNS  =zeros(T,3);
 MLExyCov=zeros(T,4);
-fprintf('spot refinement:             ')
+fitTime=zeros(1,2);
+
+%fprintf('spot refinement:             ')
+fprintf('        frame ')
+fprintf('[ symMAP symMLE ]')
+fprintf('\n              ')
+fprintf('                        ')
+
+
 for t=1:size(emTrj_px,1)
-    tic
+    t0=tic;
     frame=emTrj_px(t,4);    
     dotCoord=emTrj_px(t,[1 2 4]);
     currentFluoFrame=MV(:,:,frame);
@@ -85,14 +93,15 @@ for t=1:size(emTrj_px,1)
     bg=exp(lnpMAPdot(3));
     N =exp(lnpMAPdot(4));
     S =exp(lnpMAPdot(5));
-    tFit=toc;
     
     MAPcoord(t,1:2)=[xMAP yMAP];
     MAPcoord(t,3)=dotCoord(3); % save frame number
     MAPbNS(t,:)  =[bg N S];
     MAPxyCov(t,:)=[covMAP(1,1) covMAP(1,2) covMAP(2,2) hessRcond];
+    fitTime(1)=fitTime(1)+toc(t0);
     
     % MLE fit
+    t0=tic;
     MLEobj_sym=EMCCDfit.logL_psf(logLobj,@EMCCDfit.psf_diff_symgauss,fitData,3);
     MLEfun_sym=@(p)(-MLEobj_sym.lnL(p));  % -log(likelihood)
     lnpInit=[x0-x0Spot y0-y0Spot log(10) log(300) log(2)];      % initial guess in the ROI
@@ -107,14 +116,19 @@ for t=1:size(emTrj_px,1)
     bg=exp(lnpMLEdot(3));
     N =exp(lnpMLEdot(4));
     S =exp(lnpMLEdot(5));
-    tFit=toc;
-    
+        
     MLEcoord(t,1:2)=[xMLE yMLE];
     MLEcoord(t,3)=dotCoord(3); % save frame number
     MLEbNS(t,:)  =[bg N S];
     MLExyCov(t,:)=[covMLE(1,1) covMLE(1,2) covMLE(2,2) hessRcond];
+    fitTime(2)=fitTime(2)+toc(t0);
     
-    fprintf('\b\b\b\b\b\b\b\b\b\b\b %4d %4d ',t,T);
+    %fprintf('\b\b\b\b\b\b\b\b\b\b\b %4d %4d ',t,T);
+    fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b')
+    fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b')
+    fprintf('%04d of %04d ',frame,size(MV,3));
+    fprintf('[%7.4f%7.4f] s/spot.',fitTime/t);
+   
 end
 fprintf('\n')
 

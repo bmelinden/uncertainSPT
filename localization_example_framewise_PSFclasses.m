@@ -1,11 +1,12 @@
 % An example of using the EMCCDfit code to track a single particle
 % and estimate uncertainties with and without prior. This uses a
 % frame-by-frame analysis, which is perhaps more efficient when analyzing
-% large image sets. Also, the PSF classes are used.
-% ML 2016-08-22
+% large image sets. Also, a set of PSF classes that incorporates both PSF
+% model and prior distributions are used. 
+% ML 2016-08-31
 
 clear
-addpath(genpath(pwd))
+addpath(pwd)
 
 % parameters
 EMgain=90;
