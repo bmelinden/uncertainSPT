@@ -1,4 +1,4 @@
-classdef SymGauss < PSF.PSFModel
+classdef SymGauss < PSF.PSFmodel
     % symmetric Gaussian PSF model, described by parameters
     % p = [muX muY lnB lnN lnS], and with density
     %
@@ -21,7 +21,7 @@ classdef SymGauss < PSF.PSFModel
     methods (Access = public)
         % Constructor
         function this = SymGauss(varargin)
-            this@PSF.PSFModel(varargin{:});
+            this@PSF.PSFmodel(varargin{:});
             % sanity check for initialGuess
             if(numel(this.initialGuess)~=5)
                 error('SymGauss needs 5 initialGuess elements')
@@ -48,19 +48,25 @@ classdef SymGauss < PSF.PSFModel
         end
         
         function outStruct = convertToOutStruct(this,inPar, inStruct)
+            % outStruct = convertToOutStruct(this,inPar, inStruct)
             % Convert psf fit parameters to a nice-looking parameter
             % struct
             %
             % inPar     : parameter vector to convert.
-            % inStruct  : struct to which parameter fields are (give an
-            %             empty struct if no struct is at hand).
+            % inStruct  : Optional struct to which parameter fields are
+            %             added. 
             %
             % output: parameter struct outStruct, with fields
             % outStruct.background  : background intensity photons/area = exp(lnB)
             % outStruct.amplitude   : spot amplitude (photons)          = exp(lnN)
             % outStruct.std         : spot width, stdandard deviation   = exp(lnS)
             
-            outStruct = inStruct;
+            if(nargin==3)
+                outStruct = inStruct;
+            else
+                outStruct=struct;
+            end
+            
             [~, ~, B, N, S] = this.translateFitParameters(inPar);
             
             outStruct.background=B;

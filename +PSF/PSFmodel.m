@@ -1,4 +1,4 @@
-classdef (Abstract) PSFModel 
+classdef (Abstract) PSFmodel 
     % PSFmodel_subclass('initialGuess',pInit,'priorParameters',p0param)
     %
     % Abstract superclass for PSF model objects. All subclasses are to be 
@@ -16,7 +16,7 @@ classdef (Abstract) PSFModel
         priorParameters;
     end
     methods 
-        function this=PSFModel(varargin)
+        function this=PSFmodel(varargin)
             for n=1:2:nargin
                 this.(varargin{n})=varargin{n+1};
             end
@@ -33,8 +33,8 @@ end
 
 % overwrite +EMCCDfit/logL_psf.m with ClassDef/logL_psf2.m and update
 % syntax in various places
-
-% create a +PSF library with a +PSF/
+% ML: make sure one can still recreate a pixellated image from fit
+% parameters
 
 % example using refineSingleFrame
 

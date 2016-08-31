@@ -1,4 +1,4 @@
-classdef AsymGauss_angle < PSF.PSFModel
+classdef AsymGauss_angle < PSF.PSFmodel
     % Asymmetric Gaussian PSF model described by parameters
     % p=[ muX muY lnB lnN lnS1 lnS2 v], and with density
     %
@@ -16,7 +16,7 @@ classdef AsymGauss_angle < PSF.PSFModel
     % not matter.)
     
     properties (Constant)
-        modelName = 'Asymmetric Gaussian, std12,angle parameterization';
+        modelName = 'Asymmetric Gaussian, log(B,N,S1,S2) ,angle';
     end
     properties
         initialGuess=[];
@@ -25,7 +25,7 @@ classdef AsymGauss_angle < PSF.PSFModel
         % Constructor, requires a name-value pair
         % 'initialGuess',[ muX muY lnB lnN lnS1 lnS2 v ]
         function this= AsymGauss_angle(varargin)
-            this@PSF.PSFModel(varargin{:});
+            this@PSF.PSFmodel(varargin{:});
             % sanity check for initialGuess
             if(numel(this.initialGuess)~=7)
                 error('AsymGauss_angle needs 7 initialGuess elements')
@@ -75,8 +75,8 @@ classdef AsymGauss_angle < PSF.PSFModel
             % struct
             %
             % inPar     : parameter vector to convert.
-            % inStruct  : struct to which parameter fields are (give an
-            %             empty struct if no struct is at hand).
+            % inStruct  : Optional struct to which parameter fields are
+            %             added.
             %
             % output: parameter struct outStruct, with fields
             % outStruct.background  : background intensity photons/area = exp(lnB)
@@ -84,7 +84,11 @@ classdef AsymGauss_angle < PSF.PSFModel
             % outStruct.std12       : spot principal widths             = exp([lnS lnS2])
             % outStruct.angle       : spot orientation                  = v
             
-            outStruct = inStruct;
+            if(nargin==3)
+                outStruct = inStruct;
+            else
+                outStruct=struct;
+            end
             
             B=exp(inPar(3));
             N=exp(inPar(4));

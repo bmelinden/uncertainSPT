@@ -1,6 +1,5 @@
 function [dotCoord,dotCov,dotParam]=...
-    refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,...
-    logLobj,psfObj)
+    refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,psfObj)
 %
 % attempt MAP fit of the suggested dots in dotCoord0 to a single
 % fluorescent image fluoFrame, with mean offset fluoOffset.
@@ -39,15 +38,14 @@ function [dotCoord,dotCov,dotParam]=...
 
 dotCoord=dotCoord0;
 dotCov=zeros(size(dotCoord,1),3);
-p0=psfObj.convertToOutStruct(struct);
-
+p0=psfObj.convertToOutStruct(psfObj.initialGuess,struct);
 p0.dr=NaN;             % add refinement displacement
 p0.logL=NaN;
 dotParam(1:size(dotCoord,1))=p0;
 clear p0
 
-fminOpt = optimoptions('fminunc','TolX',1e-6,'MaxIter',500,...
-    'TolFun',1e-6,'MaxFunEvals',10000,'Display','notify','algorithm','quasi-newton' );
+fminOpt = optimoptions(EMCCDfit.pointOptimization.fminuncDefault,...
+    'TolX',1e-6,'MaxIter',500,'TolFun',1e-6,'MaxFunEvals',10000,'Display','notify' );
 
 for r=1:size(dotCoord0,1)
     tic
@@ -60,13 +58,12 @@ for r=1:size(dotCoord0,1)
     fitData=(spotROI-bgROI);
     
     % MAP fit
-    MAPobj=logL_psf2(logLobj,fitData,Nquad);
-    MAPfun=@(p)(-MAPobj.lnL(@psfObj.runModel,p)-psfObj.prior(p));        % -log(likelihood)-log(prior)
+    MAPobj=EMCCDfit.pointOptimization(logLobj,psfObj,fitData,Nquad); % likelihood function, data, and numerical quadrature
     lnpInit=psfObj.initialGuess;
     lnpInit(1:2)=[x0-x0Spot y0-y0Spot];      % initial guess in the ROI
 
     try
-        [lnpMAPdot,logLMAP,exitFlag,~,~,hessianMAP] = fminunc(MAPfun,lnpInit,fminOpt);
+        [lnpMAPdot,logLMAP,exitFlag,~,~,hessianMAP] = fminunc(MAPobj.minus_lnL,lnpInit,fminOpt);
         covMAP=inv(hessianMAP); % numerical covariance matrix
         hessRcond=rcond(hessianMAP);
         detTrace=[det(covMAP(1:2,1:2)) trace(covMAP(1:2,1:2))];
@@ -93,9 +90,11 @@ for r=1:size(dotCoord0,1)
         disp(['fminunc exitFlag = ' int2str(exitFlag)])
         disp(['rcond            = ' num2str(hessRcond)])
         disp(['fit parameters   = ' num2str(lnpMAPdot,4)])
+        disp('parameter struct :')
+        psfObj.convertToOutStruct(lnpMAPdot)
         disp(['eig (covXY)      = ' num2str(eig(covMAP(1:2,1:2))',4)])
-        disp('prior :')
-        psfObj.prior
+        disp('PSF model:')
+        psfObj
         disp('--------------------------------------------------------')
         if(0)% a visual debug block to visualize data and failed fits
             figure(13)
@@ -138,7 +137,7 @@ for r=1:size(dotCoord0,1)
     dotCoord(r,1:2)=[xMAP yMAP];
     dotCov(r,:)=[covMAP(1,1) covMAP(1,2) covMAP(2,2)];
     
-    dotParam(r) = psfObj.convertToOutStruct(dotParam(r),lnpMAPdot);
+    dotParam(r) = psfObj.convertToOutStruct(lnpMAPdot,dotParam(r));
     
     dr=norm(dotCoord(r,1:2)-dotCoord0(r,1:2));
     dotParam(r).logL=-logLMAP;

@@ -54,7 +54,7 @@ classdef SymGauss_logNormB_logSkewNormS < PSF.SymGauss
             lnSstd=this.priorParameters(4);
             lnSa  =this.priorParameters(5);
             
-            [lnL,dlnL_dlnS]=skewGauss_logPdf(lnS,lnS0,lnSstd,lnSa);
+            [lnL,dlnL_dlnS]=PSF.skewGauss_logPdf(lnS,lnS0,lnSstd,lnSa);
             y=y+lnL;
             dy(5)=dlnL_dlnS;
             
