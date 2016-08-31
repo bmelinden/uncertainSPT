@@ -19,7 +19,7 @@ Salpha=5;
 
 % prior for symmetric Gaussian PSF model
 lnPrior_lnBNS_sym=@(lnBNS)(-0.5*(lnBNS(1)-lnBGmu)^2/lnBGstd^2 ...
-            +EMCCDfit.skewGauss_logPdf(lnBNS(3),Smu0,Sstd0,Salpha));
+            +PSF.skewGauss_logPdf(lnBNS(3),Smu0,Sstd0,Salpha));
 fminOpt = optimoptions('fminunc','TolX',1e-6,'MaxIter',500,...
     'TolFun',1e-6,'MaxFunEvals',10000,'Display','notify','algorithm','quasi-newton' );
 

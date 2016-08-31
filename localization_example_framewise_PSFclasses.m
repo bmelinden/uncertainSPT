@@ -1,8 +1,8 @@
 % An example of using the EMCCDfit code to track a single particle
 % and estimate uncertainties with and without prior. This uses a
 % frame-by-frame analysis, which is perhaps more efficient when analyzing
-% large image sets.
-% ML 2016-08-04
+% large image sets. Also, the PSF classes are used.
+% ML 2016-08-22
 
 clear
 addpath(genpath(pwd))
@@ -13,53 +13,16 @@ sigmaRead=20;
 ROIwidth=9;
 Nquad=5;
 
-% parameters for a localization prior
-lnBGmu=log(0.8); % weak background prior since background is time-dependent
-lnBGstd=2;
-Smu0=log(1.5);   % same skew-normal distribution as used in main text
-Sstd0=1;
-Salpha=5;
 
-% MLE: flat prior
-psfLogNoPrior=@(x)(0);
-% prepare for using a symmetric Gaussian PSF model
-psfFun_symGauss=@EMCCDfit.psf_diff_symgauss;
-psfLogPrior_symGauss=@(xylnBNS)(-0.5*(xylnBNS(3)-lnBGmu)^2/lnBGstd^2 ...
-            +EMCCDfit.skewGauss_logPdf(xylnBNS(5),Smu0,Sstd0,Salpha));
-psfInit_symGauss=[0 0 log([0.8 100 1.5])];
-psf2param_symGauss=@EMCCDfit.psf2param_symgauss;
+PSFname='SymGauss_logNormB_logSkewNormS';
+% 'initialGuess',[mux muy lnB lnN lnS],'priorParameters',[lnB0 lnBstd lnS0 lnSstd lnSa]
+PSFparam={'initialGuess',[0 0 log([1 100 1.5])],...
+        'priorParameters',[log(0.8) 1 log(1.5) 1 5]};
+PsglnNlnS=PSF.(PSFname)(PSFparam{:});
+PsgMLE=PSF.SymGauss_MLE('initialGuess',[0 0 log([1 100 1.5])],'priorParameters',[]);
 
-
-% prepare for using an asymmetric Gaussian PSF model
-psfFun_asymGauss=@EMCCDfit.psf_diff_asymgauss_angle;
-% fit parameters : [ muX muY lnB lnN lnS1 lnS2 v]
-psfInit_asymGauss=[0 0 log([0.8 100 1.5 1.6]) 0]; % start with a little bit of asymmetry 
-psf2param_asymGauss=@EMCCDfit.psf2param_asymgauss_angle;
-% a coupe of different priors
-if(1) % log-skew-normal prior on both principal widths
-psfLogPrior_asymGauss=@(xylnBNS)(...
-            -0.5*(xylnBNS(3)-lnBGmu)^2/lnBGstd^2 ... % background prior
-            +EMCCDfit.skewGauss_logPdf(xylnBNS(5),Smu0,Sstd0,Salpha) ...
-            +EMCCDfit.skewGauss_logPdf(xylnBNS(6),Smu0,Sstd0,Salpha));
-elseif(0) % log-skew-normal prior on the geometric mean of the principal widthds
-psfLogPrior_asymGauss=@(xylnBNS)(...
-            -0.5*(xylnBNS(3)-lnBGmu)^2/lnBGstd^2 ... % background prior
-            +EMCCDfit.skewGauss_logPdf(mean(xylnBNS(5:6)),Smu0,Sstd0,Salpha));
-elseif(0) % log-skew-normal prior on the geometric mean of the principal 
-          % widths, and normal prior of the log of their ratio
-psfLogPrior_asymGauss=@(xylnBNS)(...
-            -0.5*(xylnBNS(3)-lnBGmu)^2/lnBGstd^2 ... % background prior
-            +EMCCDfit.skewGauss_logPdf(mean(xylnBNS(5:6)),Smu0,Sstd0,Salpha) ...
-            -0.5*(xylnBNS(5)-xylnBNS(6))^2/0.05^2);
-elseif(1) % log-skew-normal prior on the smallest principal width, and 
-          % normal prior of the log of their ratio
-          % this performs best on this dataset, but since it was manuallky
-          % tuned quite a bit, this might just be a coincidence
-psfLogPrior_asymGauss=@(xylnBNS)(...
-            -0.5*(xylnBNS(3)-lnBGmu)^2/lnBGstd^2 ... % background prior
-            +EMCCDfit.skewGauss_logPdf(min(xylnBNS(5:6)),Smu0,Sstd0,Salpha) ...
-            -0.5*(xylnBNS(5)-xylnBNS(6))^2/0.5^2);
-end
+PasglnN=PSF.AsymGauss_angle_logNormB('initialGuess',[0 0 log([1 100 1.25 1.75]) 0],'priorParameters',[log(0.8) 1]);
+PasgMLE=PSF.AsymGauss_angle_MLE('initialGuess',[0 0 log([1 100 1.25 1.75]) 0],'priorParameters',[]);
 
 % indata: this is a simulated movie, and thus we use the known true
 % positions instead of spot detection to create an initial guess
@@ -122,9 +85,8 @@ for frame=1:size(MV,3)
         
         % symmetric Gaussian, MAP fit
         t0=tic;
-        [frameCoord,frameCov,framePar]=...
-            EMCCDfit.MAP_EMCCD_refineSingleFrame(frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,...
-            psfFun_symGauss,psfLogPrior_symGauss,psfInit_symGauss,psf2param_symGauss);
+        [frameCoord,frameCov,framePar]=EMCCDfit.refineSingleFrame(...
+            frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,PsglnNlnS);
         fitTime(1)=fitTime(1)+toc(t0);
         
         coord_sg_MAP(ind,:)=frameCoord; % save frame number
@@ -133,9 +95,8 @@ for frame=1:size(MV,3)
         
         % symmetric Gaussian, no prior
         t0=tic;
-         [frameCoord,frameCov,framePar]=...
-            EMCCDfit.MAP_EMCCD_refineSingleFrame(frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,...
-            psfFun_symGauss,psfLogNoPrior,psfInit_symGauss,psf2param_symGauss);
+         [frameCoord,frameCov,framePar]=EMCCDfit.refineSingleFrame(...
+            frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,PsgMLE);
         fitTime(2)=fitTime(2)+toc(t0);
 
         coord_sg_MLE(ind,:)=frameCoord; % save frame number
@@ -144,9 +105,8 @@ for frame=1:size(MV,3)
         
         % asymmetric Gaussian, MAP fit
         t0=tic;
-        [frameCoord,frameCov,framePar]=...
-            EMCCDfit.MAP_EMCCD_refineSingleFrame(frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,...
-            psfFun_asymGauss,psfLogPrior_asymGauss,psfInit_asymGauss,psf2param_asymGauss);
+        [frameCoord,frameCov,framePar]=EMCCDfit.refineSingleFrame(...
+            frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,PasglnN);
         fitTime(3)=fitTime(3)+toc(t0);
 
         coord_ag_MAP(ind,:)=frameCoord; % save frame number
@@ -155,9 +115,8 @@ for frame=1:size(MV,3)
 
         % asymmetric Gaussian, MLE fit
         t0=tic;
-        [frameCoord,frameCov,framePar]=...
-            EMCCDfit.MAP_EMCCD_refineSingleFrame(frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,...
-            psfFun_asymGauss,psfLogNoPrior,psfInit_asymGauss,psf2param_asymGauss);
+        [frameCoord,frameCov,framePar]=EMCCDfit.refineSingleFrame(...
+            frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,PasgMLE);
         fitTime(4)=fitTime(4)+toc(t0);
 
         coord_ag_MLE(ind,:)=frameCoord; % save frame number

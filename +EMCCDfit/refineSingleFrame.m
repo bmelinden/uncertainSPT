@@ -63,7 +63,7 @@ for r=1:size(dotCoord0,1)
     lnpInit(1:2)=[x0-x0Spot y0-y0Spot];      % initial guess in the ROI
 
     try
-        [lnpMAPdot,logLMAP,exitFlag,~,~,hessianMAP] = fminunc(MAPobj.minus_lnL,lnpInit,fminOpt);
+        [lnpMAPdot,logLMAP,exitFlag,~,~,hessianMAP] = fminunc(@MAPobj.minus_lnL,lnpInit,fminOpt);
         covMAP=inv(hessianMAP); % numerical covariance matrix
         hessRcond=rcond(hessianMAP);
         detTrace=[det(covMAP(1:2,1:2)) trace(covMAP(1:2,1:2))];

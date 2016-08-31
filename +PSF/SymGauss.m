@@ -29,7 +29,7 @@ classdef SymGauss < PSF.PSFmodel
         end
         % PSFmodel functions in this class level
         function [E,dEdp]= psfDensity(this, xx, yy, param)
-            
+        %   [E,dEdp]= psfDensity(this, xx, yy, param)  
             [muX, muY, B, N, S] = this.translateFitParameters(param);
             S2=S^2;            
             NEexp=N/S2/2/pi*exp(-1/2/S2*((muX-xx).^2+(muY-yy).^2));
