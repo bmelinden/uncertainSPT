@@ -92,7 +92,7 @@ for r=1:size(dotCoord0,1)
         disp(['fit parameters   = ' num2str(lnpMAPdot,4)])
         disp('parameter struct :')
         psfObj.convertToOutStruct(lnpMAPdot)
-        disp(['eig (covXY)      = ' num2str(eig(covMAP(1:2,1:2))',4)])
+        %disp(['eig (covXY)      = ' num2str(eig(covMAP(1:2,1:2))',4)])
         disp('PSF model:')
         psfObj
         disp('--------------------------------------------------------')
