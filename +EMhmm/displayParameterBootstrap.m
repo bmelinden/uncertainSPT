@@ -58,7 +58,8 @@ disp('parameter +- bootstrap std err : ')
 floatString=[' %' int2str(ncd(1)) '.' int2str(ncd(2)) 'f +- %' int2str(ncd(1)) '.' int2str(ncd(2)) 'f | '];
 for k=1:length(f)
     P=Pmle.(f{k});
-    dP=std(BS.(f{k}),[],3);
+    ind= sum(sum(~isfinite(BS.(f{k})),1),2)==0;
+    dP=std(BS.(f{k})(:,:,ind),[],3);
     for r=1:size(P,1)
         fprintf([' %' int2str(varLength) 's : '],f{k})
         for c=1:size(P,2)
@@ -68,6 +69,10 @@ for k=1:length(f)
                 fprintf(floatString,P(r,c),dP(r,c))
             end
         end
-        fprintf('\n')
+        if( sum(ind) == size(BS.(f{k}),3)) % then all BS replicas are finite
+            fprintf('\n')
+        else
+            fprintf(' Warning: found non-finite replicas!\n')
+        end
     end
 end

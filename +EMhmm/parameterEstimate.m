@@ -110,7 +110,7 @@ function pSS=steadyStateFromA(A)
         ASS=(A/bMax)^Nss; % this deals with the possibility that the largest eigenvalue is not exactly 1.
         pSS=ASS(1,:);
     else
-        pSS=NaN(1,W.N);
+        pSS=NaN(1,size(A,1));
         warning('Steady state not found.')
     end
 end
