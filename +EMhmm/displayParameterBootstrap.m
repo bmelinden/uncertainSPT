@@ -1,4 +1,4 @@
-function displayParameterBootstrap(Pmle,BS,ncd)
+function displayParameterBootstrap(Pmle,BS,ncd,Dscale)
 % EMhmm.displayParameterBootstrap(Pmle,BS,ncd)
 %
 % Displays parameter +- bootstrap std. err.
@@ -8,6 +8,9 @@ function displayParameterBootstrap(Pmle,BS,ncd)
 % ncd   : number of characters and decimals in numeric strings. 
 %         ncd(1) > ncd(2) is recommended. efault : ncd = [6 3], i.e., 
 %         6 characters, 3 decimal places.
+% Dscale: rescale units of step variance (e.g., Dscale=1e-6 to convert 
+%         nm^2/s to um^2/s), affects lambda and all variables ending in D.
+%         Default 1.
 %
 % ML 2016-08-19
  
@@ -42,6 +45,9 @@ function displayParameterBootstrap(Pmle,BS,ncd)
 if( ~exist('ncd','var') || isempty(ncd) )
     ncd=[6 3];
 end
+if( ~exist('Dscale','var') || isempty(Dscale) )
+    Dscale=1;
+end
 
 f=fieldnames(Pmle);
 varLength=1;
@@ -52,12 +58,21 @@ disp('parameter +- bootstrap std err : ')
 floatString=[' %' int2str(ncd(1)) '.' int2str(ncd(2)) 'f +- %' int2str(ncd(1)) '.' int2str(ncd(2)) 'f | '];
 for k=1:length(f)
     P=Pmle.(f{k});
-    dP=std(BS.(f{k}),[],3);
+    ind= sum(sum(~isfinite(BS.(f{k})),1),2)==0;
+    dP=std(BS.(f{k})(:,:,ind),[],3);
     for r=1:size(P,1)
         fprintf([' %' int2str(varLength) 's : '],f{k})
         for c=1:size(P,2)
-            fprintf(floatString,P(r,c),dP(r,c))
+            if(strcmp(f{k}(end),'D') || strcmp(f{k},'lambda'))
+                fprintf(floatString,P(r,c)*Dscale,dP(r,c)*Dscale)
+            else
+                fprintf(floatString,P(r,c),dP(r,c))
+            end
         end
-        fprintf('\n')
+        if( sum(ind) == size(BS.(f{k}),3)) % then all BS replicas are finite
+            fprintf('\n')
+        else
+            fprintf(' Warning: found non-finite replicas!\n')
+        end
     end
 end
