@@ -47,6 +47,10 @@ individual files.
 EMCCDfit contents
 ---------------------------------------------------------------------
 localization_example.m  : example of spot localization
+localization_example_framewise.m : spot localization frame by frame,
+				   experimenting with different PSF
+				   models and priors
+MAP_EMCCD_refineSingleFrame.m 	 : localize spots in a single image
 logL_EMCCD_lookup.m     : a lookup-table object for EMCCD noise
 logL_psf.m              : a likelihood object that combines a camera noise 
                           model, a psf model, and an image

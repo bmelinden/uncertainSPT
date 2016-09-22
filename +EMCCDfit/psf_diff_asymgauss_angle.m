@@ -8,7 +8,10 @@ function [E,dE_dmuX,dE_dmuY,dE_dlnB,dE_dlnN,dE_dlnS1,dE_dlnS2,dE_dv]=...
 % E = exp(lnB) + f, with 
 % f = N/2/pi/S1/S2*exp(-0.5*( cos(v)*(xx-muX)+sin(v)*(yy-muY))^2/S1^2
 %                      -0.5*(-sin(v)*(xx-muX)+cos(v)*(yy-muY))^2/S2^2)
-
+%
+% Note that this is a continuous model, so that exp(lnB) is the background
+% intensity per unit area, not per pixel. But when doing math in pixel
+% units the area per pixel is 1, and then this does not matter.
 %% copyright notice
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % EMCCDfit.psf_diff_asymgauss.m, asymmetric Gaussian PSF model
