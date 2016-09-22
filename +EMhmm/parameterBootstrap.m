@@ -68,6 +68,7 @@ end
 P=cell(1,Nbs);
 disp(['Converging ' int2str(Nbs) ' bootstrap replicas.'])
 parfor k=1:Nbs
+%for k=1:Nbs
     t0=tic;
     % resample and recoverge
     [Xb,Wb,trj]=EMhmm.reorder_trj(dat,W);
