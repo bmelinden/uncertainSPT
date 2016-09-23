@@ -1,5 +1,5 @@
-function [dotCoord,dotCov,dotParam]=...
-    refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,psfObj)
+function [dotCoord,dotCov,dotParam,rawParam]=...
+    refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,psfObj,fitParam0)
 %
 % attempt MAP fit of the suggested dots in dotCoord0 to a single
 % fluorescent image fluoFrame, with mean offset fluoOffset.
@@ -13,17 +13,13 @@ function [dotCoord,dotCov,dotParam]=...
 %             pixel intensity
 % logLobj   : logL_EMCCD_lookup object (this is how EMgain and readoutNoise
 %             are included in the fit).
-% psfFun    : function handle to a continuous PSF model , e.g., psf_diff_symgauss
-% psfLogPrior : function handle to the PSF log(prior), must be consistent
-%             with psfFun and take the same input.
-% psfInit   : parameter vector with initial guessfor dot fitting, must be
-%             consistent with psfFun. The two first entries are dot
-%             positions, and will not be used.
-% psf2param : function handle to PSF parameter converter 
-%             (fit parameter vector -> parameter struct). Must be
-%             consistent with psfFun.
+% psfObj    : psf object with prior and initial guess, subclass of PSF.PSFmodel 
+% fitParam0 : optional complete initial guess array. Replaces the initial
+%             guess that is normally derived from dotCoord0 and the psfObj.
+%             Useful for multi-step optimization, when the output of one
+%             optimization step is used as initial guess for the next.
 % 
-% dotCoor   : same as dotCoord0, but with first two columns updated to x,y
+% dotCoord  : same as dotCoord0, but with first two columns updated to x,y
 %             positions from the fit.
 % dotCov    : position covariances, dotCov(t,:)= [varX covXY varY],
 %             from a Laplace approximation.
@@ -31,10 +27,17 @@ function [dotCoord,dotCov,dotParam]=...
 %             psf2param function+additional fields
 %             dr = distance between refined position and initial guess
 %             logL = MAP fit log(likelihood)
+% rawParam  : raw fit parameter array, as returned by fminunc; this is the
+%             same format as that of fitParam0
 %
 % For spots where the optimization fails, dotCov(t,:)=[inf inf inf]
 %
 % Martin Lindén, bmelinden@gmail.com, 2016-08-03
+
+externalInitialGuess=false;
+if(exist('fitParam0','var') && ~isempty(fitParam0))    
+    externalInitialGuess=true;
+end
 
 dotCoord=dotCoord0;
 dotCov=zeros(size(dotCoord,1),3);
@@ -43,6 +46,7 @@ p0.dr=NaN;             % add refinement displacement
 p0.logL=NaN;
 dotParam(1:size(dotCoord,1))=p0;
 clear p0
+
 
 fminOpt = optimoptions(EMCCDfit.pointOptimization.fminuncDefault,...
     'TolX',1e-6,'MaxIter',500,'TolFun',1e-6,'MaxFunEvals',10000,'Display','notify' );
@@ -62,18 +66,26 @@ for r=1:size(dotCoord0,1)
     lnpInit=psfObj.initialGuess;
     lnpInit(1:2)=[x0-x0Spot y0-y0Spot];      % initial guess in the ROI
 
+    if(externalInitialGuess)
+        lnpInit=fitParam0(r,:);
+    end
+    if(r==1)
+        rawParam=zeros(size(dotCoord0,1),size(lnpInit,2));
+    end
+    rawParam(r,:)=lnpInit;
     try
         [lnpMAPdot,logLMAP,exitFlag,~,~,hessianMAP] = fminunc(@MAPobj.minus_lnL,lnpInit,fminOpt);
         covMAP=inv(hessianMAP); % numerical covariance matrix
         hessRcond=rcond(hessianMAP);
         detTrace=[det(covMAP(1:2,1:2)) trace(covMAP(1:2,1:2))];
+        rawParam(r,:)=lnpMAPdot;
     catch me
         %warning('MAP optimization error! Writing NaN results.')
         %disp(me)
         % if something goes wrong already here, we discard
         % the point
         exitFlag=-inf;
-        logLMAP=nan;
+        logLMAP=inf;
         lnpMAPdot=nan(1,length(lnpInit));
         hessianMAP=inf(1,2);
         hessRcond=0;
