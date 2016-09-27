@@ -45,9 +45,9 @@ classdef SymGauss_logNormB_logSkewNormS < PSF.SymGauss
             lnB0=this.priorParameters(1);
             lnBstd=this.priorParameters(2);
            
-            y = y - 1/2 *(lnB - lnB0).^2./(lnBstd^2);
+            y = y - 1/2 *(lnB - lnB0).^2./(lnBstd^2)-0.5*log(2*pi*lnBstd^2);
             dy(3)=- (lnB - lnB0)./(lnBstd^2);
-           
+
             % PSF width
             lnS   =param(5);
             lnS0  =this.priorParameters(3);
