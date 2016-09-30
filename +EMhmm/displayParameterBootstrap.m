@@ -1,9 +1,12 @@
 function displayParameterBootstrap(Pmle,BS,ncd,Dscale)
 % EMhmm.displayParameterBootstrap(Pmle,BS,ncd)
 %
-% Displays parameter +- bootstrap std. err.
+% Displays parameter +- bootstrap std. err. For parameters and thier
+% meaning, see EMhmm.
 % 
-% Pmle  : parameter struct, see EMhmm.parameterEstimate
+% Pmle  : optional parameter struct to display as central estimate, see
+%         EMhmm.parameterEstimate. If not given, bootstrap mean values are
+%         displayed instead.
 % BS    : bootstrap parameter struct, see EMhmm.parameterBootstrap
 % ncd   : number of characters and decimals in numeric strings. 
 %         ncd(1) > ncd(2) is recommended. efault : ncd = [6 3], i.e., 
@@ -48,6 +51,16 @@ end
 if( ~exist('Dscale','var') || isempty(Dscale) )
     Dscale=1;
 end
+if( ~exist('Pmle','var') || isempty(Pmle) )
+    % then use mean value over the bootstrap replicas
+    f=fieldnames(BS);
+    Pmle=struct;
+    for k=1:length(f)
+        ind= sum(sum(~isfinite(BS.(f{k})),1),2)==0;
+        Pmle.(f{k})=mean(BS.(f{k})(:,:,ind),3);
+    end
+end
+
 
 f=fieldnames(Pmle);
 varLength=1;

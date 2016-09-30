@@ -81,7 +81,8 @@ classdef AsymGauss_angle < PSF.PSFmodel
             % output: parameter struct outStruct, with fields
             % outStruct.background  : background intensity photons/area = exp(lnB)
             % outStruct.amplitude   : spot amplitude (photons)          = exp(lnN)
-            % outStruct.std12       : spot principal widths             = exp([lnS lnS2])
+            % outStruct.std1        : spot principal width 1            = exp(lnS1)
+            % outStruct.std2        : spot principal width 2            = exp(lnS2)
             % outStruct.angle       : spot orientation                  = v
             
             if(nargin==3)
@@ -101,7 +102,8 @@ classdef AsymGauss_angle < PSF.PSFmodel
             
             outStruct.background=B;
             outStruct.amplitude =N;
-            outStruct.std12     =[S1 S2];
+            outStruct.std1      =S1;
+            outStruct.std2      =S2;
             outStruct.angle=v;
         end
     end

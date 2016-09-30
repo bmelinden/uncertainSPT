@@ -160,7 +160,7 @@ parfor n=1:restarts
     % simple MLE convergence    
     tconv=tic;
     Wmle{n}=EMhmm.init_P_dat(tau,R,Ddt_init,A_init,p0_init,dat);   
-    disp(['converging MLE model ' int2str(n)])% ' of ' int2str(restarts) ])
+    %disp(['converging MLE model ' int2str(n)])% ' of ' int2str(restarts) ])
     W0=Wmle{n};
     Wmle{n}=EMhmm.MLEconverge(Wmle{n},dat,MLEargs{:});
     disp(['converged MLE model ' int2str(n) ', ' int2str(size(A_init,1)) ' states, ' num2str(toc(tconv)/60)  ' min.'])% ' of ' int2str(restarts) ])

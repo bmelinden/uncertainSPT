@@ -17,7 +17,7 @@ function est=parameterEstimate(W,dt,varargin)
 %    dwellSteps: mean dwell time in units of time step
 %     dwellTime: mean dwell times in units of time
 %
-% option input: parameterEstimate(W,dt,'2state',Dthr) produces additional
+% optional input: parameterEstimate(W,dt,'2state',Dthr) produces additional
 %               parameter estimates est.ag2_... for a coasre-grained model
 %               with a slow (D<=Dthr) and a fast (D>Dthr) state, by simply
 %               adding up the summary statistics into two groups.
@@ -74,9 +74,16 @@ est.lambda=W.P.lambda;
 est.p0= W.P.p0;
 est.pOcc=rowNormalize(sum(W.S.pst,1));
 est.A = W.P.A;
-est.pSS =steadyStateFromA(est.A);
+[est.pSS,allOK] =EMhmm.steadyStateFromA(est.A);
 est.dwellSteps= 1./(1-diag(est.A)'); % mean dwell times [steps]
 est.dwellTime = dt./(1-diag(est.A)'); % mean dwell times [time units]
+
+if(~allOK)
+   warning('Problem computing full steady state. wA =') 
+   disp(num2str(W.S.wA))  
+   disp('A=')
+   disp(num2str(W.P.A))
+end
 
 % print and plot MLE results with thresholds
 if(slowFastAggregate)
@@ -93,24 +100,16 @@ if(slowFastAggregate)
     wA(2,1)=sum(sum(W.S.wA(iFast,iSlow)));
     wA(2,2)=sum(sum(W.S.wA(iFast,iFast)));
     est.ag2_A=rowNormalize(wA);
-
+    [est.ag2_pSS,allOK]=EMhmm.steadyStateFromA(est.ag2_A);
     est.ag2_dwellSteps= 1./(1-diag(est.ag2_A)'); % mean dwell times [steps]
     est.ag2_dwellTime = dt./(1-diag(est.ag2_A)'); % mean dwell times [time units]
-end
-end
-function pSS=steadyStateFromA(A)
-    b=eig(A);
-    if(sum(abs(b-1)<10*eps)>1)
-        warning('Steady state possibly not unique.')
+    if(~allOK)
+       warning('Problem computing reduced steady state. wA = ')
+       disp(num2str(wA))
+       disp('A=')
+       disp(num2str(W.P.A))
     end
-    bMax=max(b);
-    b2nd=max(abs(b(b<bMax)));
-    if(abs(bMax-1)<10*eps && ~isempty(b2nd))
-        Nss=ceil(log(eps)/log(b2nd));
-        ASS=(A/bMax)^Nss; % this deals with the possibility that the largest eigenvalue is not exactly 1.
-        pSS=ASS(1,:);
-    else
-        pSS=NaN(1,size(A,1));
-        warning('Steady state not found.')
-    end
+
+
+end
 end
