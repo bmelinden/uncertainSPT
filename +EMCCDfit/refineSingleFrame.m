@@ -1,7 +1,8 @@
-function [dotCoord,dotCov,dotParam]=...
-    refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,psfObj)
-% [dotCoord,dotCov,dotParam]=...
-%   refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,psfObj)
+function [dotCoord,dotCov,dotParam,rawParam]=...
+    refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,psfObj,fitParam0,saveError)
+% [dotCoord,dotCov,dotParam,rawParam]=...
+%    refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,...
+%    logLobj,psfObj,fitParam0,saveError)
 %
 % attempt MAP fit of the suggested dots in dotCoord0 to a single
 % fluorescent image fluoFrame, with mean offset fluoOffset.
@@ -15,16 +16,15 @@ function [dotCoord,dotCov,dotParam]=...
 %             pixel intensity
 % logLobj   : logL_EMCCD_lookup object (this is how EMgain and readoutNoise
 %             are included in the fit).
-% psfFun    : function handle to a continuous PSF model , e.g., psf_diff_symgauss
-% psfLogPrior : function handle to the PSF log(prior), must be consistent
-%             with psfFun and take the same input.
-% psfInit   : parameter vector with initial guessfor dot fitting, must be
-%             consistent with psfFun. The two first entries are dot
-%             positions, and will not be used.
-% psf2param : function handle to PSF parameter converter 
-%             (fit parameter vector -> parameter struct). Must be
-%             consistent with psfFun.
-% 
+% psfObj    : psf object with prior and initial guess, subclass of PSF.PSFmodel 
+% fitParam0 : optional complete initial guess array. Replaces the initial
+%             guess that is normally derived from dotCoord0 and the psfObj.
+%             Useful for multi-step optimization, when the output of one
+%             optimization step is used as initial guess for the next.
+% saveError : Optional. If true, save workspace for points that somehow
+%             fail to converge to disk. Useful for debugging. 
+%             Default: false.
+%
 % dotCoord  : same as dotCoord0, but with first two columns updated to x,y
 %             positions from the fit.
 % dotCov    : position covariances, dotCov(t,:)= [varX covXY varY],
@@ -33,16 +33,28 @@ function [dotCoord,dotCov,dotParam]=...
 %             psf2param function+additional fields
 %             dr = distance between refined position and initial guess
 %             logL = MAP fit log(likelihood)
+%             detH = |determinant of logL Hessian|
+% rawParam  : raw fit parameter array, as returned by fminunc; this is the
+%             same format as that of fitParam0
 %
 % For spots where the optimization fails, dotCov(t,:)=[inf inf inf]
 %
-% Martin Lindén, bmelinden@gmail.com, 2016-08-03
+% Martin Lindén, bmelinden@gmail.com, 2016-09-26
+externalInitialGuess=false;
+if(exist('fitParam0','var') && ~isempty(fitParam0))    
+    externalInitialGuess=true;
+end
+if(~exist('saveError','var') || isempty(saveError))    
+    saveError=false;
+end
 
 dotCoord=dotCoord0;
 dotCov=zeros(size(dotCoord,1),3);
 p0=psfObj.convertToOutStruct(psfObj.initialGuess,struct);
 p0.dr=NaN;             % add refinement displacement
 p0.logL=NaN;
+p0.logLaic=NaN;
+p0.logLbic=NaN;
 dotParam(1:size(dotCoord,1))=p0;
 clear p0
 
@@ -64,23 +76,34 @@ for r=1:size(dotCoord0,1)
     lnpInit=psfObj.initialGuess;
     lnpInit(1:2)=[x0-x0Spot y0-y0Spot];      % initial guess in the ROI
 
+    if(externalInitialGuess)
+        lnpInit=fitParam0(r,:);
+    end
+    if(r==1)
+        rawParam=zeros(size(dotCoord0,1),size(lnpInit,2));
+    end
+    rawParam(r,:)=lnpInit;
     try
-        [lnpMAPdot,logLMAP,exitFlag,~,~,hessianMAP] = fminunc(@MAPobj.minus_lnL,lnpInit,fminOpt);
+        [lnpMAPdot,logLMAP,exitFlag,~,~,hessianMAP] = ...
+            fminunc(@MAPobj.minus_lnL,lnpInit,fminOpt);
         covMAP=inv(hessianMAP); % numerical covariance matrix
         hessRcond=rcond(hessianMAP);
         detTrace=[det(covMAP(1:2,1:2)) trace(covMAP(1:2,1:2))];
+        rawParam(r,:)=lnpMAPdot;
+        logDetH=sum(log(eig(hessianMAP)));        
     catch me
         %warning('MAP optimization error! Writing NaN results.')
         %disp(me)
         % if something goes wrong already here, we discard
         % the point
         exitFlag=-inf;
-        logLMAP=nan;
+        logLMAP=inf;
         lnpMAPdot=nan(1,length(lnpInit));
         hessianMAP=inf(1,2);
         hessRcond=0;
         covMAP=inf(length(lnpInit),length(lnpInit));
         detTrace=inf(1,2);
+        logDetH=0;
     end
     xMAP=x0Spot+lnpMAPdot(1);
     yMAP=y0Spot+lnpMAPdot(2);
@@ -98,6 +121,10 @@ for r=1:size(dotCoord0,1)
         disp('PSF model:')
         psfObj
         disp('--------------------------------------------------------')
+        if(saveError)
+            errFile=sprintf('errLog_refineSingleFrame_%09d.mat',round(1e9*rand));
+            save(errFile)
+        end
         if(0)% a visual debug block to visualize data and failed fits
             figure(13)
             clf
@@ -138,12 +165,14 @@ for r=1:size(dotCoord0,1)
     end
     dotCoord(r,1:2)=[xMAP yMAP];
     dotCov(r,:)=[covMAP(1,1) covMAP(1,2) covMAP(2,2)];
-    
     dotParam(r) = psfObj.convertToOutStruct(lnpMAPdot,dotParam(r));
     
     dr=norm(dotCoord(r,1:2)-dotCoord0(r,1:2));
-    dotParam(r).logL=-logLMAP;
-    dotParam(r).dr=dr;             % add refinement displacement
+    dotParam(r).logL=-logLMAP;        
+    K=numel(lnpInit);
+    dotParam(r).logLaic=dotParam(r).logL-K;
+    dotParam(r).logLbic=dotParam(r).logL-1/2*logDetH+K/2*log(2*pi);
+    dotParam(r).dr=dr;	% add refinement displacement
     
     if( false && ( dotCov(1,1)<0 || dotCov(2,2)<0 ) )
         % a visual debug block: it seems most fits that encounter this

@@ -31,13 +31,21 @@ function W=MLEparameterUpdate(W,dat)
 % with this program. If not, see <http://www.gnu.org/licenses/>.
 %% start of actual code
 
-
 beta=W.tau*(1-W.tau)-W.R;
 tau=W.tau;
 
 %% parameter update
 W.P.A=rowNormalize(W.S.wA);
 W.P.p0=rowNormalize(sum(W.S.pst(W.one,:),1));
+
+% check for unoccupied rows
+wAemptyRows=find((sum(W.S.wA,2)==0))';
+if(~isempty(wAemptyRows)) % a very non-invasive regularization, no new transitions
+   W.P.A=rowNormalize(W.S.wA+10*eps*eye(W.N));
+   W.P.p0=rowNormalize(sum(W.S.pst(W.one,:),1)+10*eps);
+   %warning(['State(s) ' int2str(wAemptyRows) ' unoccupied, MLEparameterUpdate adding 10*eps pseudocounts to avoid NaNs'])
+end
+
 
 % second attempt at diffusion constants
 MLEopt = optimoptions('fminunc','GradObj','off','TolX',1e-14,...
@@ -59,10 +67,14 @@ for j=1:W.N
     nj=W.dim/2*sum(pt);    
     cj=0.5*sum(pt.*dy2);
     
-    Fj=@(L)(-nj*log(L)-cj/L-0.5*sum(pt.*sum(log1p(beta*L./dat.v(indS,:))+dxy2./(dat.v(indS,:)+beta*L),2)));
+    if(nj>0) % only MLE update if there is any occupancy on which to base the update
+        Fj=@(L)(-nj*log(L)-cj/L-0.5*sum(pt.*sum(log1p(beta*L./dat.v(indS,:))+dxy2./(dat.v(indS,:)+beta*L),2)));
     
-    mLogLj=@(logLam)(-Fj(exp(logLam)));
-    W.P.lambda(j)=exp(fminunc(mLogLj,log(W.P.lambda(j)),MLEopt));
+        mLogLj=@(logLam)(-Fj(exp(logLam)));
+        W.P.lambda(j)=exp(fminunc(mLogLj,log(W.P.lambda(j)),MLEopt));
+    else
+        W.P.lambda(j)=1e100; % set rediculously large value to put unoccupied state last in ordered models
+    end
 end
 
 

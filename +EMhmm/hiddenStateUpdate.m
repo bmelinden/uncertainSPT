@@ -93,6 +93,7 @@ H(W.end,:)=0;
 [lnZ,W.S.wA,W.S.pst]=HMM_multiForwardBackward_startend(W.P.A,H,dat.one,dat.end);
 W.S.lnZ=lnZ+sum(lnHmax);
 W.pOcc=rowNormalize(sum(W.S.pst,1));
+
 %% likelihood lower bound after s
 W.lnL=W.S.lnZ-W.Y.MeanLnQ;
 %% path estimates
