@@ -1,5 +1,7 @@
 function [dotCoord,dotCov,dotParam]=...
     refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,psfObj)
+% [dotCoord,dotCov,dotParam]=...
+%   refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,psfObj)
 %
 % attempt MAP fit of the suggested dots in dotCoord0 to a single
 % fluorescent image fluoFrame, with mean offset fluoOffset.
@@ -23,7 +25,7 @@ function [dotCoord,dotCov,dotParam]=...
 %             (fit parameter vector -> parameter struct). Must be
 %             consistent with psfFun.
 % 
-% dotCoor   : same as dotCoord0, but with first two columns updated to x,y
+% dotCoord  : same as dotCoord0, but with first two columns updated to x,y
 %             positions from the fit.
 % dotCov    : position covariances, dotCov(t,:)= [varX covXY varY],
 %             from a Laplace approximation.
