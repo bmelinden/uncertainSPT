@@ -36,13 +36,13 @@ tau=W.tau;
 
 %% parameter update
 W.P.A=rowNormalize(W.S.wA);
-W.P.p0=rowNormalize(sum(W.S.pst(W.one,:),1));
+W.P.p0=rowNormalize(sum(W.S.pst(W.i0,:),1));
 
 % check for unoccupied rows
 wAemptyRows=find((sum(W.S.wA,2)==0))';
 if(~isempty(wAemptyRows)) % a very non-invasive regularization, no new transitions
    W.P.A=rowNormalize(W.S.wA+10*eps*eye(W.N));
-   W.P.p0=rowNormalize(sum(W.S.pst(W.one,:),1)+10*eps);
+   W.P.p0=rowNormalize(sum(W.S.pst(W.i0,:),1)+10*eps);
    %warning(['State(s) ' int2str(wAemptyRows) ' unoccupied, MLEparameterUpdate adding 10*eps pseudocounts to avoid NaNs'])
 end
 
@@ -53,7 +53,7 @@ MLEopt = optimoptions('fminunc','GradObj','off','TolX',1e-14,...
     'MaxFunEvals',1e10,'DerivativeCheck','off','Display','none');
 
 indS=1:sum(dat.T+1);
-indS(W.end)=0;
+indS(W.i1)=0;
 indS=indS(indS>0);
 dy2=sum((W.Y.mu(indS+1,:)-W.Y.mu(indS,:)).^2 ...
     +W.Y.sig0(indS,:)+W.Y.sig0(indS+1,:)-2*W.Y.sig1(indS,:),2);

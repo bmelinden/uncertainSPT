@@ -56,8 +56,8 @@ alphaX(~isfinite(dat.v))=0;
 zeros(size(dat.x));
 L0=zeros(size(dat.x)); % Lambda matrix diagonal     L0(t)=Lambda(t,t);
 L1=zeros(size(dat.x)); % Lambda matrix off-diagonal L1(t)=Lambda(t,t+1)
-for t=1:length(W.one)
-    indY=W.one(t):W.end(t); % indices to all hidden positions
+for t=1:length(W.i0)
+    indY=W.i0(t):W.i1(t); % indices to all hidden positions
     indS=indY(1:end-1);     % indices to hidden states and observed positions
 
     % dynamic localization variance
@@ -90,7 +90,7 @@ logDet=zeros(1,W.dim);
 for k=1:W.dim
     if(1)
         [W.Y.sig0(:,k),W.Y.sig1(:,k),logDet(k)]=triSym_triInv_rescale_trjWise(...
-            L0(:,k),L1(:,k),W.one,W.end,numel(W.one));
+            L0(:,k),L1(:,k),W.i0,W.i1,numel(W.i0));
         % a possible fix when something goes really wrong with the recursive
         % tridiagonal inversion, which is not so good numerically.
         if( ~isempty(find(~isfinite(W.Y.mu(:,k)),1)) || ...
@@ -98,10 +98,10 @@ for k=1:W.dim
                 ~isempty(find(~isfinite(W.Y.sig1(:,k)),1)) || ...
                 ~isfinite(logDet(k)) )
             % find the offending trajectories and try to correct them
-            llD=zeros(1,numel(W.one));
-            for m=1:numel(W.one)
-                ind=W.one(m):W.end(m);
-                [ss0,ss1,llD(m)]=triSym_triInv_rescale_trjWise(L0(ind,k),L1(ind,k),1,1+W.end(m)-W.one(m),1);
+            llD=zeros(1,numel(W.i0));
+            for m=1:numel(W.i0)
+                ind=W.i0(m):W.i1(m);
+                [ss0,ss1,llD(m)]=triSym_triInv_rescale_trjWise(L0(ind,k),L1(ind,k),1,1+W.i1(m)-W.i0(m),1);
                 if(~isfinite(llD(m)))
                     LD=spdiags([ L1(ind,k) L0(ind,k) [0;L1(ind(1:end-1),k)]],-1:1,length(ind),length(ind));
                     llD(m)=sum(log(eig(LD)));
@@ -121,9 +121,9 @@ for k=1:W.dim
         % alternative path update that uses only matlabs built-in routines,
         % possibly giving a more stable (if slower) solution.
         [W.Y.sig0(:,k),W.Y.sig1(:,k),logDet(k)]=triSym_triInv_backslash(...
-            L0(:,k),L1(:,k),W.one,W.end);
+            L0(:,k),L1(:,k),W.i0,W.i1);
     end
     
-    %[sig0(:,k),sig1(:,k),lD(k)]=triSym_triInv_rescale_trjWise_m(L0(:,k),L1(:,k),W.one,W.end,numel(W.one));
+    %[sig0(:,k),sig1(:,k),lD(k)]=triSym_triInv_rescale_trjWise_m(L0(:,k),L1(:,k),W.i0,W.i1,numel(W.i0));
 end
 W.Y.MeanLnQ=-sum(W.dim/2*(dat.T+1)*(1+log(2*pi)))+0.5*sum(logDet); % <lnQ(y)>

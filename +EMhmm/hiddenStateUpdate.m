@@ -40,11 +40,11 @@ beta=W.tau*(1-W.tau)-W.R;
 tau=W.tau;
 %% assemble point-wise weights
 lnH=zeros(size(W.S.pst ));   
-for t=1:length(W.one)
+for t=1:length(W.i0)
     % initial state distribution
-    lnH(W.one(t),:)=log(W.P.p0);
+    lnH(W.i0(t),:)=log(W.P.p0);
     % -d/2*log(lambda_j)
-    indY=W.one(t):W.end(t); % indices to all hidden positions
+    indY=W.i0(t):W.i1(t); % indices to all hidden positions
     indS=indY(1:end-1);     % indices to hidden states and observed positions
     indO=indS(isfinite(dat.v(indS,1))); % indices to non-missing observed data
     TO=numel(indO); % number of observed positions in this trj
@@ -87,10 +87,10 @@ end
 lnHmax=max(lnH,[],2);
 lnH=lnH-lnHmax*ones(1,W.N);
 H=exp(lnH);
-H(W.end,:)=0;
+H(W.i1,:)=0;
 %% forward-backward iteration
-%[ln3,wA3,ps3]=HMM_multiForwardBackward_g1(W.P.A,H,dat.end);
-[lnZ,W.S.wA,W.S.pst]=HMM_multiForwardBackward_startend(W.P.A,H,dat.one,dat.end);
+%[ln3,wA3,ps3]=HMM_multiForwardBackward_g1(W.P.A,H,dat.i1);
+[lnZ,W.S.wA,W.S.pst]=HMM_multiForwardBackward_startend(W.P.A,H,dat.i0,dat.i1);
 W.S.lnZ=lnZ+sum(lnHmax);
 W.pOcc=rowNormalize(sum(W.S.pst,1));
 
@@ -99,10 +99,10 @@ W.lnL=W.S.lnZ-W.Y.MeanLnQ;
 %% path estimates
 if(nargout>=2) % compute sequence of most likely states
    [~,sMaxP]=max(W.S.pst,[],2); 
-   sMaxP(W.end)=0;
+   sMaxP(W.i1)=0;
 end
 if(nargout>=3) % compute Viterbi path, with a small offset to avoid infinities
-   sVit=HMM_multiViterbi_log_startend(log(W.P.A+1e-50),log(H+1e-50),W.one,W.end-1);
+   sVit=HMM_multiViterbi_log_startend(log(W.P.A+1e-50),log(H+1e-50),W.i0,W.i1-1);
 end
 if(nargout>=4)
    fname=['foo_' int2str(ceil(1e5*rand)) '.mat'];

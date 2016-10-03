@@ -44,7 +44,7 @@ function [Xb,Wb,trj]=reorder_trj(X0,W0,trj)
 % with this program. If not, see <http://www.gnu.org/licenses/>.
 
 %% start of actual code
-Ntrj=length(W0.one); % number of trajectories in the model
+Ntrj=length(W0.i0); % number of trajectories in the model
 
 % resampled trajectory indices if not given
 if(~exist('trj','var') || isempty(trj))
@@ -61,24 +61,24 @@ Xb.dim=dim;
 Xb.T=T;
 Xb.x=zeros(sum(T+1),dim);
 Xb.v=zeros(sum(T+1),dim);
-Xb.one=zeros(1,length(T),'double');
-Xb.end =zeros(1,length(T),'double');
+Xb.i0=zeros(1,length(T),'double');
+Xb.i1 =zeros(1,length(T),'double');
 
 ind=1;
 for k=1:length(trj)
     k0=trj(k);
     
-    x=X0.x(X0.one(k0):X0.end(k0),1:dim);
-    v=X0.v(X0.one(k0):X0.end(k0),1:dim);
+    x=X0.x(X0.i0(k0):X0.i1(k0),1:dim);
+    v=X0.v(X0.i0(k0):X0.i1(k0),1:dim);
     Tx=size(x,1);
 
-    Xb.one(k)=ind;
-    Xb.end(k)=ind+Tx-1;
+    Xb.i0(k)=ind;
+    Xb.i1(k)=ind+Tx-1;
     ind=ind+Tx;
-    Xb.x(Xb.one(k):Xb.end(k),1:dim)=x; 
-    Xb.v(Xb.one(k):Xb.end(k),1:dim)=v;
+    Xb.x(Xb.i0(k):Xb.i1(k),1:dim)=x; 
+    Xb.v(Xb.i0(k):Xb.i1(k),1:dim)=v;
     if(doMisc)
-       Xb.misc( Xb.one(k):Xb.end(k),:)=X0.misc( X0.one(k0):X0.end(k0),:);
+       Xb.misc( Xb.i0(k):Xb.i1(k),:)=X0.misc( X0.i0(k0):X0.i1(k0),:);
     end
     ind=ind+1;
 end
@@ -91,9 +91,9 @@ Wb.S.wA=W0.S.wA; % requires no permutation
 for k=1:length(trj)
     k0=trj(k);
     
-    Wb.Y.mu(Wb.one(k):Wb.end(k),:)  =W0.Y.mu(W0.one(k0):W0.end(k0),:);
-    Wb.Y.sig0(Wb.one(k):Wb.end(k),:)=W0.Y.sig0(W0.one(k0):W0.end(k0),:);
-    Wb.Y.sig1(Wb.one(k):Wb.end(k),:)=W0.Y.sig1(W0.one(k0):W0.end(k0),:);
-    Wb.S.pst(Wb.one(k):Wb.end(k),:) =W0.S.pst(W0.one(k0):W0.end(k0),:);
+    Wb.Y.mu(Wb.i0(k):Wb.i1(k),:)  =W0.Y.mu(W0.i0(k0):W0.i1(k0),:);
+    Wb.Y.sig0(Wb.i0(k):Wb.i1(k),:)=W0.Y.sig0(W0.i0(k0):W0.i1(k0),:);
+    Wb.Y.sig1(Wb.i0(k):Wb.i1(k),:)=W0.Y.sig1(W0.i0(k0):W0.i1(k0),:);
+    Wb.S.pst(Wb.i0(k):Wb.i1(k),:) =W0.S.pst(W0.i0(k0):W0.i1(k0),:);
 end
 Wb.pOcc=rowNormalize(sum(Wb.S.pst,1));

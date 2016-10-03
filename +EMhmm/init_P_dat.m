@@ -44,8 +44,8 @@ W=struct;   % model struct
 W.N=length(Ddt_init);
 W.dim=dat.dim;
 
-W.one  = dat.one;
-W.end  = dat.end+1;
+W.i0  = dat.i0;
+W.i1  = dat.i1+1;
 W.lnL=0;    % log likelihood
 W.tau=tau;
 W.R=R;
@@ -60,7 +60,7 @@ W.P.p0=p0_init;
 % hidden path subfield, with no Infs or NaNs
 W.Y=struct;
 W.Y.mu   = dat.x;   % <y(t)>
-W.Y.mu(W.end,:)=dat.x(W.end-1,:); % unobsered last position
+W.Y.mu(W.i1,:)=dat.x(W.i1-1,:); % unobsered last position
 
 % fill out missing positions by linear interpolation
 ind0=find( isfinite(dat.v(:,1)));
@@ -71,7 +71,7 @@ end
 
 W.Y.sig0 = dat.v;   % var(y(t))
 W.Y.sig0(dat.v==inf)=mean(dat.v(isfinite(dat.v).*(dat.v>0)>0));
-W.Y.sig0(W.end,:) = dat.v(W.end-1,:);   % var(y(t))
+W.Y.sig0(W.i1,:) = dat.v(W.i1-1,:);   % var(y(t))
 if(~isempty(find(~isfinite(W.Y.sig0(:)),1)))
     warning('initial guess generated non-finite position variances, possibly due to dat.v=inf at the end or beginning of trajectories.')
     W.Y.sig0(W.Y.sig0==inf)=mean(dat.v(isfinite(dat.v).*(dat.v>0)>0));

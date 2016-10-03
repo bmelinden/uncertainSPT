@@ -141,8 +141,8 @@ end
 dat.T=T;
 dat.x=zeros(sum(T+1),dim);
 dat.v=zeros(sum(T+1),dim);
-dat.one=zeros(1,length(X),'double');
-dat.end =zeros(1,length(X),'double');
+dat.i0=zeros(1,length(X),'double');
+dat.i1 =zeros(1,length(X),'double');
 if(doMisc)
     miscColumns=size(misc{1},2);
    dat.misc=zeros(sum(T+1),miscColumns);
@@ -157,13 +157,13 @@ for k=1:length(X)
     if(~isempty(find(isfinite(v(:)).*(v(:)<=0),1)))
        error(['vbspt.preprocess found variance<=0 in trj ' int2str(k) ])
     end    
-    dat.one(k)=ind;
-    dat.end(k)=ind+Tx-1;
+    dat.i0(k)=ind;
+    dat.i1(k)=ind+Tx-1;
     ind=ind+Tx;
-    dat.x(dat.one(k):dat.end(k),1:dim)=x; 
-    dat.v(dat.one(k):dat.end(k),1:dim)=v;
+    dat.x(dat.i0(k):dat.i1(k),1:dim)=x; 
+    dat.v(dat.i0(k):dat.i1(k),1:dim)=v;
     if(doMisc)
-       dat.misc( dat.one(k):dat.end(k),1:miscColumns)=misc{k};
+       dat.misc( dat.i0(k):dat.i1(k),1:miscColumns)=misc{k};
     end
     ind=ind+1;
 end
