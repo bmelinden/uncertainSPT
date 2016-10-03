@@ -43,6 +43,7 @@ function [Xb,Wb,trj]=reorder_trj(X0,W0,trj)
 % You should have received a copy of the GNU General Public License along
 % with this program. If not, see <http://www.gnu.org/licenses/>.
 
+%% start of actual code
 Ntrj=length(W0.one); % number of trajectories in the model
 
 % resampled trajectory indices if not given
