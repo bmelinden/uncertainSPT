@@ -59,7 +59,7 @@ end
 BS=EMhmm.parameterEstimate(W,dt,Pargs{:});
 
 f=fieldnames(BS);
-ind=zeros(Nbs,length(W.one));
+ind=zeros(Nbs,length(W.i0));
 for v=1:length(f)
     [rows,cols]=size(BS.(f{v}));
     BS.(f{v})=zeros(rows,cols,Nbs);

@@ -133,7 +133,8 @@ classdef pointOptimization
             % derivatives (if the psf and logL objects can compute them).
             % Presently, no derivatives and quasi-newton algorithm is used.
             opt=optimoptions(@fminunc);
-            opt=optimoptions(opt,'SpecifyObjectiveGradient',false,'algorithm','quasi-newton');
+            opt=optimoptions(opt,'algorithm','quasi-newton');
+            %opt=optimoptions(opt,'SpecifyObjectiveGradient',false); % 
         end
     end
 end

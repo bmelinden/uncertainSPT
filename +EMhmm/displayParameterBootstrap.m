@@ -1,5 +1,5 @@
 function displayParameterBootstrap(Pmle,BS,ncd,Dscale)
-% EMhmm.displayParameterBootstrap(Pmle,BS,ncd)
+% EMhmm.displayParameterBootstrap(Pmle,BS,ncd,Dscale)
 %
 % Displays parameter +- bootstrap std. err. For parameters and thier
 % meaning, see EMhmm.

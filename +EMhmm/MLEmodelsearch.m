@@ -150,6 +150,7 @@ ModSearchExit.method='';
 Wmle=cell(1,restarts);
 Wnb=cell(1,restarts);
 %disp('starting MLE pafor loop')
+%%%for n=1:restarts
 parfor n=1:restarts
     % construct initial model
     A_init=dirrnd(wA);
