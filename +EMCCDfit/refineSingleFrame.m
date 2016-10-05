@@ -122,7 +122,11 @@ for r=1:size(dotCoord0,1)
         psfObj
         disp('--------------------------------------------------------')
         if(saveError)
-            errFile=sprintf('errLog_refineSingleFrame_%09d.mat',round(1e9*rand));
+            if(exist('errLogs','dir')==7 || mkdir('errLogs'))
+                errFile=sprintf('errLogs%serrLog_refineSingleFrame_%09d.mat',filesep,round(1e9*rand));
+            else
+                errFile=sprintf('errLog_refineSingleFrame_%09d.mat',round(1e9*rand));
+            end
             save(errFile)
         end
         if(0)% a visual debug block to visualize data and failed fits

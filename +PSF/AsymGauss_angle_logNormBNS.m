@@ -15,7 +15,7 @@ classdef AsymGauss_angle_logNormBNS < PSF.AsymGauss_angle
     % (The initial guess is passed on to the AsymGauss constructor.)
     % Note that both psf width S1,S2 have the same prior parameters
     properties (Constant)
-        priorName='log-normal background';
+        priorName='log-normal parameters';
     end
     properties
         priorParameters	=[];
