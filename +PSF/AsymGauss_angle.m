@@ -68,8 +68,8 @@ classdef AsymGauss_angle < PSF.PSFmodel
         end
         
         % convert a parameter set to a nice-looking parameter struct
-        function outStruct = convertToOutStruct(this,inPar, inStruct)
-            % outStruct = convertToOutStruct(inPar, inStruct)
+        function [outStruct,outPar] = convertToOutStruct(this,inPar, inStruct)
+            % [outStruct,outPar] = convertToOutStruct(inPar, inStruct)
             %
             % Convert psf fit parameters to a nice-looking parameter
             % struct
@@ -84,7 +84,7 @@ classdef AsymGauss_angle < PSF.PSFmodel
             % outStruct.std1        : spot principal width 1            = exp(lnS1)
             % outStruct.std2        : spot principal width 2            = exp(lnS2)
             % outStruct.angle       : spot orientation                  = v
-            
+            % outPar                : [B N S1 S2 v]
             if(nargin==3)
                 outStruct = inStruct;
             else
@@ -105,6 +105,8 @@ classdef AsymGauss_angle < PSF.PSFmodel
             outStruct.std1      =S1;
             outStruct.std2      =S2;
             outStruct.angle=v;
+            
+            outPar=[B N S1 S2 v];
         end
     end
 end
