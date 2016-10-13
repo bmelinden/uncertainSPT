@@ -84,8 +84,7 @@ for r=1:size(dotCoord0,1)
     end
     rawParam(r,:)=lnpInit;
     try
-        [lnpMAPdot,logLMAP,exitFlag,~,~,hessianMAP] = ...
-            fminunc(@MAPobj.minus_lnL,lnpInit,fminOpt);
+        [lnpMAPdot,logLMAP,exitFlag,~,~,hessianMAP] =fminunc(@MAPobj.minus_lnL,lnpInit,fminOpt);
         covMAP=inv(hessianMAP); % numerical covariance matrix
         hessRcond=rcond(hessianMAP);
         detTrace=[det(covMAP(1:2,1:2)) trace(covMAP(1:2,1:2))];
@@ -130,6 +129,7 @@ for r=1:size(dotCoord0,1)
             save(errFile)
         end
         if(0)% a visual debug block to visualize data and failed fits
+            %% the visualization block
             figure(13)
             clf
             subplot(2,1,1)
@@ -152,7 +152,7 @@ for r=1:size(dotCoord0,1)
             
             subplot(2,2,4)
             hold on
-            Emodel=MAPobj.psfModel(lnpMAPdot);
+            Emodel=MAPobj.intensityModel(lnpMAPdot);
             imagesc(Emodel*logLobj.EMgain+bgROI)
             plot(lnpMAPdot(1),lnpMAPdot(2),'ro')
             plot(lnpInit(1),lnpInit(2),'gs')

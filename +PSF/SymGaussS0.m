@@ -1,11 +1,11 @@
 classdef SymGaussS0 < PSF.PSFmodel
     % symmetric Gaussian PSF model with width offset, described by
     % parameters 
-    % p = [muX muY lnB lnN lnS], and with density
+    % p = [muX muY lnB lnN lndS], and with density
     %
     % E = B + N/2/pi/S^2*exp(-0.5*((xx-muX)/S)^2-0.5*((yy-muY)/S)^2), 
     %
-    % where B= exp(lnB), N = exp(lnN), S = S0*(1+exp(lnS)), 
+    % where B= exp(lnB), N = exp(lnN), S = S0*(1+exp(lndS)), 
     % and width PSF width scale S0=0.21*lambda/NA. 
     % The offset is the Gaussian approximation of a perfectly focused spot,
     % and therefore a physics-based lower on the PSF width. Note that while
@@ -60,8 +60,8 @@ classdef SymGaussS0 < PSF.PSFmodel
                 dEdp(:,:,2)=-(muY-yy).*NEexp/S2; % dE_dmuY 
                 dEdp(:,:,3)=ones(size(E))*B; % dE_dlnBG
                 dEdp(:,:,4)= NEexp; % dE_dlnN 
-                %dEdp(:,:,5)= NEexp.*(-2+((muX-xx).^2+(muY-yy).^2)/S2); % dE_dlnS 
-                error('derivative wrt lnS not implemented yet')
+                %dEdp(:,:,5)= NEexp.*(-2+((muX-xx).^2+(muY-yy).^2)/S2); % dE_dlndS 
+                error('derivative wrt lndS not implemented yet')
                 % compute parameter dependent pixel intensities for symmetric Gaussian, with derivatives
                 % ML 2015-11-17 : partial derivatives validated, except for
                 % the new offset width.
@@ -79,7 +79,7 @@ classdef SymGaussS0 < PSF.PSFmodel
             % output: parameter struct outStruct, with fields
             % outStruct.background  : background intensity photons/area = exp(lnB)
             % outStruct.amplitude   : spot amplitude (photons)          = exp(lnN)
-            % outStruct.std         : spot width, stdandard deviation   = exp(lnS)
+            % outStruct.std         : spot width, stdandard deviation   = S0*(1+exp(lndS))
             % outPar                : [B N S]
             
             if(nargin==3)

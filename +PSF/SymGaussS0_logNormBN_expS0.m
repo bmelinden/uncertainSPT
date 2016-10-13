@@ -1,21 +1,24 @@
 classdef SymGaussS0_logNormBN_expS0 < PSF.SymGaussS0
     % a symmetric Gaussian PSF model with width offset (SymGaussS0), with
-    % an exponential prior on the rescaled psf width y=(S-S0)/S0=exp(lnS),
+    % an exponential prior on the excess psf width dS=(S-S0)/S0=exp(lndS),
     % which translates to a prior density  
     %
-    % p0(lnS) = 1/y0*exp(lnS-exp(lnS)/y0)
+    % p0(lndS) = 1/dS0*exp(lndS-exp(lndS)/dS0)
     % 
-    % for an exponential prior with mean value y0. The background and spot
-    % amplitude have log-normal priors, i.e., normal priors on the fit
-    % parameters lnB, lnN, with mean value parameters lnB0, lnN0, and
-    % std-parameters lnBstd, lnNstd.
+    % for an exponential prior with mean value dS0. 
+    %
+    % The background and spot amplitude have log-normal priors, i.e.,
+    % normal priors on the fit parameters lnB, lnN, with mean value
+    % parameters lnB0, lnN0, and std-parameters lnBstd, lnNstd. Setting
+    % lnBstd, lnNstd to inf gives flat priors on lnB or lnN, respectively.
+    % lnBstd=lnNstd=inf is equivalent to SymGaussS0_expS0.m
     %
     % Construction:
-    % P = SymGaussS0_MLE('initialGuess',[mux muy lnB lnN lnS],'S0','priorParameters',[lnB0 lnBstd lnN0 lnNstd y0]),
-    % P = SymGaussS0_MLE('initialGuess',[mux muy lnB lnN lnS],'lambda',lambda,'NA',NA,'priorParameters',[lnB0 lnBstd lnN0 lnNstd y0]),
+    % P = SymGaussS0_logNormBN_expS0('initialGuess',[mux muy lnB lnN lndS],'S0','priorParameters',[lnB0 lnBstd lnN0 lnNstd dS0]),
+    % P = SymGaussS0_logNormBN_expS0('initialGuess',[mux muy lnB lnN lndS],'lambda',lambda,'NA',NA,'priorParameters',[lnB0 lnBstd lnN0 lnNstd dS0]),
     % (the initial guess, NA,lambda or S0 are passed on to the SymGaussS0 constructor)
     properties (Constant)
-        priorName='no prior';
+        priorName='logNorm(B,N), exp(dS)';
     end
     properties
         priorParameters	=[];
@@ -28,30 +31,34 @@ classdef SymGaussS0_logNormBN_expS0 < PSF.SymGaussS0
             this@PSF.SymGaussS0(varargin{:});
             % sanity check on priors
             if(numel(this.priorParameters)~=5 )
-               error('PSF.SymGaussS0_logNormN_expS0 needs 5 prior parameters [lnB0 lnBstd lnN0 lnNstd y0]')
+               error('PSF.SymGaussS0_logNormN_expS0 needs 5 prior parameters [lnB0 lnBstd lnN0 lnNstd dS0]')
             end
         end
         % log prior density
-        function [y,dy] = logPrior(~,param)
+        function [y,dy] = logPrior(this,param)
             
-            lnB=param(3);
-            lnB0=this.priorParameters(1);
+            lndS=param(5);
+            dS0=this.priorParameters(5);
+            
+            y= -log(dS0)+lndS-exp(lndS)/dS0;
+            dy=zeros(size(param));
+            dy(5) = 1-exp(lndS)/dS0;
+            
             lnBvar=this.priorParameters(2)^2;
-           
-            lnN=param(4);
-            lnN0=this.priorParameters(3);
-            lnNvar=this.priorParameters(4)^2;
-           
-            y0=this.priorParameters(5);            
+            if(isfinite(lnBvar))
+                lnB=param(3);
+                lnB0=this.priorParameters(1);
+                y=y -1/2 *(lnB - lnB0).^2./lnBvar -0.5*log(2*pi*lnBvar);
+                dy(3)=- (lnB - lnB0)./lnBvar;
+            end
             
-            y= -1/2 *(lnB - lnB0).^2./lnBvar -0.5*log(2*pi*lnBvar)...
-               -1/2 *(lnN - lnN0).^2./lnNvar -0.5*log(2*pi*lnNvar)...
-               -log(y0)+lnS-exp(lnS)/y0;
-           
-           dy=zeros(size(param));
-           dy(3)=- (lnB - lnB0)./lnBvar;
-           dy(4)=- (lnN - lnN0)./lnNvar;
-           dy(5) = 1-exp(lnS)/y0;
+            lnNvar=this.priorParameters(4)^2;
+            if(isfinite(lnNvar))
+                lnN=param(4);
+                lnN0=this.priorParameters(3);
+                y=y -1/2 *(lnN - lnN0).^2./lnNvar -0.5*log(2*pi*lnNvar);
+                dy(4)=- (lnN - lnN0)./lnNvar;
+            end
         end
     end
 end

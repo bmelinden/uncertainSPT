@@ -54,7 +54,7 @@ classdef logL_EMCCD_lookup < matlab.mixin.Copyable
     methods (Access=protected)
         function logL_EMCCD_setup(obj,EMgain,sigmaRead,c_grid,E_grid)
             [CC,EE]=meshgrid(c_grid,E_grid);
-            lnL= EMCCDfit.log_likelihood_EMCCD_brute_parfor(CC,EE,EMgain,sigmaRead);            
+            lnL= EMCCDfit.log_likelihood_EMCCD_brute_serial(CC,EE,EMgain,sigmaRead);            
             obj.GIlinE = griddedInterpolant({c_grid,E_grid},lnL','spline','linear');
         end
     end
