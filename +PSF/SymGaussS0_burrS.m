@@ -33,7 +33,7 @@ classdef SymGaussS0_burrS < PSF.SymGaussS0
             if(numel(this.priorParameters)~=3 )
                 error('PSF.SymGaussS0_burrS needs 3 prior parameters [alpha c k]')
             end
-            this.pB=prob.BurrDistribution(this.priorParameters(5),this.priorParameters(6),this.priorParameters(7));
+            this.pB=prob.BurrDistribution(this.priorParameters(1),this.priorParameters(2),this.priorParameters(3));
         end
         % Burr distribution log likelihood
         function [lnP,dlnPdlndS] = lnP_expBurr(this,lndS)
