@@ -10,7 +10,7 @@ and
 2) EMhmm, a variational EM algorithm that performs maximum likelihood
 inference in a diffusive hidden Markov model, where both motion blur
 and localization uncertainty are included in the model, through an
-extension of the Berlund model for single-state diffusion [1].
+extension of the Berglund model for single-state diffusion [1].
 
 The code runs on matlab, with some inner loops implemented in
 C/C++. Binaries for 64 bit linux and max OS are included.
@@ -38,10 +38,12 @@ General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-This product includes code developed by Jan-Willem van de Meent (in
-external/), and Fredrik Persson (in +EMCCDfit/), see copyright in
-individual files.
+=====================================================================
+This product includes code developed by others, see copyright in
+individual files:
+dirrnd.m, dirpdf.m by Jan-Willem van de Meent (in tools/)
+ML_loadStack2.m, by Fredrik Person (in +EMCCDfit)
+HMMcore/, by Martin Lindén
 =====================================================================
 ---------------------------------------------------------------------
 EMCCDfit contents
