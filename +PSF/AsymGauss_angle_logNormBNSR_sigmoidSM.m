@@ -27,7 +27,7 @@ classdef AsymGauss_angle_logNormBNSR_sigmoidSM < PSF.AsymGauss_angle
     % which case S0 = 0.21*lambda/NA is computed internally.
     
     properties (Constant)
-        priorName='log-normal parameters';
+        priorName='log-normal(B,N, S1/S2), sigmoid(sqrt(S1*S2))';
     end
     properties
         priorParameters	=[];

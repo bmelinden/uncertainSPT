@@ -1,4 +1,4 @@
-classdef AsymGauss_angle_logNormBN_sigmoidS_normdS < PSF.AsymGauss_angle
+classdef AsymGauss_angle_logNormBN_sigmoidSm_normdS < PSF.AsymGauss_angle
     % An asymmetric Gaussian PSF model (see AsymGauss_angle) where
     %
     % * background B and amplitude N have log-normal priors with location
@@ -33,7 +33,7 @@ classdef AsymGauss_angle_logNormBN_sigmoidS_normdS < PSF.AsymGauss_angle
     % which case S0 = 0.21*lambda/NA is computed internally.
     
     properties (Constant)
-        priorName='log-normal parameters';
+        priorName='log-normal(B,N), sigmoid(sqrt(S1*S2)), normal(S1-S2)';
     end
     properties
         priorParameters	=[];
@@ -43,7 +43,7 @@ classdef AsymGauss_angle_logNormBN_sigmoidS_normdS < PSF.AsymGauss_angle
     
     methods
         % Constructor
-        function this = AsymGauss_angle_logNormBN_sigmoidS_normdS(varargin)
+        function this = AsymGauss_angle_logNormBN_sigmoidSm_normdS(varargin)
             % call superclass constructor
             this@PSF.AsymGauss_angle(varargin{:});
             % sanity check on prior parameters
@@ -55,10 +55,10 @@ classdef AsymGauss_angle_logNormBN_sigmoidS_normdS < PSF.AsymGauss_angle
                 S0=0.21*this.lambda/this.NA;
                 this.priorParameters=[this.priorParameters(1:6) S0];
             else
-                error('PSF.AsymGauss_angle_logNormBNSR_sigmoidSM needs 7 or 8 prior parameters')
+                error('PSF.AsymGauss_angle_logNormBN_sigmoidSm_normdS needs 7 or 8 prior parameters')
             end
             if( ~isempty(find(this.priorParameters([2 4 6]) <=0,1)) )
-                error('PSF.AsymGauss_angle_logNormBNSR_sigmoidSM needs positive scale and std parameters.')
+                error('PSF.AsymGauss_angle_logNormBN_sigmoidSm_normdS needs positive scale and std parameters.')
             end
         end
         
