@@ -60,15 +60,7 @@ classdef SymGauss_logNormBN_sigmoidExpS < PSF.SymGauss
         end
         % log prior density
         function [y,dy] = logPrior(this,param)
-            
-            lnB    =param(3);
-            lnB0   =this.priorParameters(1);
-            lnBvar =this.priorParameters(2)^2;
-            
-            lnN    =param(4);
-            lnN0   =this.priorParameters(3);
-            lnNvar =this.priorParameters(4)^2;
-            
+                                    
             lnS=param(5);
             S=exp(lnS);
             L      =this.priorParameters(5);
@@ -81,13 +73,19 @@ classdef SymGauss_logNormBN_sigmoidExpS < PSF.SymGauss
             dy(5)=S/dsScale/S0./(1+exp((S/S0-1)/dsScale))-S/L/S0;
             % derivative numerically verified, ML 2016-10-10
             
+            lnBvar =this.priorParameters(2)^2;
             if(isfinite(lnBvar))
-                y=y-1/2 *(lnB - lnB0).^2./lnBvar -0.5*log(2*pi*lnBvar);
-                dy(3)=- (lnB - lnB0)./lnBvar;
+                lnB    =param(3);
+                lnB0   =this.priorParameters(1);
+                y      =y-1/2*(lnB - lnB0).^2./lnBvar -0.5*log(2*pi*lnBvar);
+                dy(3)  =-(lnB - lnB0)./lnBvar;
             end
+            lnNvar =this.priorParameters(4)^2;
             if(isfinite(lnNvar))
-                y=y-1/2 *(lnN - lnN0).^2./lnNvar -0.5*log(2*pi*lnNvar);
-                dy(4)=- (lnN - lnN0)./lnNvar;
+                lnN    =param(4);
+                lnN0   =this.priorParameters(3);
+                y      =y-1/2 *(lnN - lnN0).^2./lnNvar -0.5*log(2*pi*lnNvar);
+                dy(4)  =-(lnN - lnN0)./lnNvar;
             end
             
         end

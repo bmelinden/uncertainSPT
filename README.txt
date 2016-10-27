@@ -42,7 +42,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 This product includes code developed by others, see copyright in
 individual files:
 dirrnd.m, dirpdf.m by Jan-Willem van de Meent (in tools/)
-ML_loadStack2.m, by Fredrik Person (in +EMCCDfit)
+ML_loadStack2.m, by Fredrik Person (in +EMCCDfit/)
 HMMcore/, by Martin Lindén
 =====================================================================
 ---------------------------------------------------------------------
