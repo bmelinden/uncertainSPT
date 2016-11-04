@@ -5,7 +5,8 @@ classdef SymGaussS0_logNormBN_expS0 < PSF.SymGaussS0
     %
     % p0(lndS) = 1/dS0*exp(lndS-exp(lndS)/dS0)
     % 
-    % for an exponential prior with mean value dS0. 
+    % for an exponential prior with mean value dS0. dS0=inf give a flat
+    % prior on lndS, i.e., p0(s)~1/s.
     %
     % The background and spot amplitude have log-normal priors, i.e.,
     % normal priors on the fit parameters lnB, lnN, with mean value
@@ -37,13 +38,15 @@ classdef SymGaussS0_logNormBN_expS0 < PSF.SymGaussS0
         % log prior density
         function [y,dy] = logPrior(this,param)
             
+            y=0;
+            dy=zeros(size(param));
+
             lndS=param(5);
             dS0=this.priorParameters(5);
-            
-            y= -log(dS0)+lndS-exp(lndS)/dS0;
-            dy=zeros(size(param));
-            dy(5) = 1-exp(lndS)/dS0;
-            
+            if(isfinite(dS0))
+                y=y-log(dS0)+lndS-exp(lndS)/dS0;
+                dy(5) = 1-exp(lndS)/dS0;
+            end
             lnBvar=this.priorParameters(2)^2;
             if(isfinite(lnBvar))
                 lnB=param(3);
