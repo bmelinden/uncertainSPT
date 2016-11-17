@@ -1,4 +1,4 @@
-function [dotCoord,dotCov,dotParam,rawParam]=...
+function [dotCoord,dotCov,dotParam,rawParam,dotParVec]=...
     refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,psfObj,fitParam0,saveError)
 % [dotCoord,dotCov,dotParam,rawParam]=...
 %    refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,...
@@ -30,12 +30,14 @@ function [dotCoord,dotCov,dotParam,rawParam]=...
 % dotCov    : position covariances, dotCov(t,:)= [varX covXY varY],
 %             from a Laplace approximation.
 % dotParam  : a parameter struct array, with fields specified by the
-%             psf2param function+additional fields
+%             convertToOutStruct method+additional fields
 %             dr = distance between refined position and initial guess
 %             logL = MAP fit log(likelihood)
 %             detH = |determinant of logL Hessian|
 % rawParam  : raw fit parameter array, as returned by fminunc; this is the
 %             same format as that of fitParam0
+% dotParVec : fit parameter vector, each row as returned by the second
+%             argument of the convertToOutStruct method.
 %
 % For spots where the optimization fails, dotCov(t,:)=[inf inf inf]
 %
@@ -50,12 +52,13 @@ end
 
 dotCoord=dotCoord0;
 dotCov=zeros(size(dotCoord,1),3);
-p0=psfObj.convertToOutStruct(psfObj.initialGuess,struct);
+[p0,v0]=psfObj.convertToOutStruct(psfObj.initialGuess,struct);
 p0.dr=NaN;             % add refinement displacement
 p0.logL=NaN;
 p0.logLaic=NaN;
 p0.logLbic=NaN;
 dotParam(1:size(dotCoord,1))=p0;
+dotParVec=zeros(size(dotCoord,1),size(v0,2));
 clear p0
 
 fminOpt = optimoptions(EMCCDfit.pointOptimization.fminuncDefault,...
@@ -169,7 +172,8 @@ for r=1:size(dotCoord0,1)
     end
     dotCoord(r,1:2)=[xMAP yMAP];
     dotCov(r,:)=[covMAP(1,1) covMAP(1,2) covMAP(2,2)];
-    dotParam(r) = psfObj.convertToOutStruct(lnpMAPdot,dotParam(r));
+    [dotParam(r),dotParVec(r,:)] = psfObj.convertToOutStruct(lnpMAPdot,dotParam(r));
+    
     
     dr=norm(dotCoord(r,1:2)-dotCoord0(r,1:2));
     dotParam(r).logL=-logLMAP;        

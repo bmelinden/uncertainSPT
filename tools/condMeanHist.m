@@ -1,5 +1,5 @@
 function [FcMean,xcMean,n,dx]=condMeanHist(x,y,xE,F,nMin,setNaN)
-% [Fc,xcMean,n,dx]=condMeanHist(x,y,F,xE,nMin)
+% [FcMean,xcMean,n,dx]=condMeanHist(x,y,xE,F,nMin,setNaN)
 %
 % compute conditional mean values <F(y)|x in bin j> for x in bins specified by
 % edges xE. Values outside the edges are ignored, and bins with too few

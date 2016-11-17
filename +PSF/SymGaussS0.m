@@ -6,7 +6,7 @@ classdef SymGaussS0 < PSF.PSFmodel
     % E = B + N/2/pi/S^2*exp(-0.5*((xx-muX)/S)^2-0.5*((yy-muY)/S)^2), 
     %
     % where B= exp(lnB), N = exp(lnN), S = S0*(1+exp(lndS)), 
-    % and width PSF width scale S0=0.21*lambda/NA. 
+    % and the PSF width scale is S0=0.21*lambda/NA. 
     % The offset is the Gaussian approximation of a perfectly focused spot,
     % and therefore a physics-based lower on the PSF width. Note that while
     % lambda and NA are object properties, only the S0 property is used
