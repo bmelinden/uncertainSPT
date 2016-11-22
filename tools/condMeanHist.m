@@ -19,8 +19,8 @@ function [FcMean,xcMean,n,dx]=condMeanHist(x,y,xE,F,nMin,setNaN)
 %         Default: true.
 %
 % FcMean : conditional function values, Fc(j) = F(y | xE(j)<= x < xE(j+1)), 
-%         j=1,2,..., length(xE)-1. Note that it must retur a single value
-%         from multiple inputs. Default: @mean
+%         j=1,2,..., length(xE)-1. Note that F must return a single value
+%         from multiple inputs.
 % xcMean: conditional mean value xcMean(j) = <x| xE(j)<= x < xE(j+1)>. If
 %         n<nMin, the arithmetic mean (xE(j)+xE(j+1))/2 is returned.
 % n     : bin counts 
