@@ -31,6 +31,8 @@ function W=MLEmodelsearch(dat,R,tau,N,varargin)
 % scalePar  : [scaleMin scaleSteps]. scaleMin is the smallest scaling value
 %             to use for rms/blur parameters. scaleSteps is the number of
 %             scaling steps. Default : [1e-3 5];
+% parfor    : if true (default), run restarts in a parfor loop, otherwise
+%             use a standard for loop.
 %
 % Name-value pairs not recognized a passed on to EMhmm.MLEconverge at
 % appropriate times, e.g.,
@@ -84,6 +86,7 @@ doSmaxP=false;
 scaleMin=1e-2;
 scaleSteps=7;
 maxIter=5000;
+do_parfor=true;
 
 showConv_lnL=false;
 showExit=true;
@@ -131,6 +134,8 @@ while(nv <= length(varargin))
    elseif(strcmp(pname,'scalePar'))
        scaleMin=pval(1);
        scaleSteps=pval(2);
+   elseif(strcmp(pname,'parfor'))
+       do_parfor=pval;
    else
        disp(['Passing option ' pname ' to MLEconverge.'])
        MLEargs{end+1}=pname;
@@ -150,28 +155,52 @@ ModSearchExit.method='';
 Wmle=cell(1,restarts);
 Wnb=cell(1,restarts);
 %disp('starting MLE pafor loop')
-%%%for n=1:restarts
-parfor n=1:restarts
-    % construct initial model
-    A_init=dirrnd(wA);
-    p0_init=A_init^1000;
-    p0_init=p0_init(1,:);
-    Ddt_init=exp(sort(logDdt(1)+rand(1,2*N-1)*diff(logDdt)));
-    Ddt_init=Ddt_init(1:2:end); % some spread between diffusion constants    
-    % simple MLE convergence    
-    tconv=tic;
-    Wmle{n}=EMhmm.init_P_dat(tau,R,Ddt_init,A_init,p0_init,dat);   
-    %disp(['converging MLE model ' int2str(n)])% ' of ' int2str(restarts) ])
-    W0=Wmle{n};
-    Wmle{n}=EMhmm.MLEconverge(Wmle{n},dat,MLEargs{:});
-    disp(['converged MLE model ' int2str(n) ', ' int2str(size(A_init,1)) ' states, ' num2str(toc(tconv)/60)  ' min.'])% ' of ' int2str(restarts) ])
-    pause(0.1)
-    Wmle{n}.modSearch='mle rnd init';
-    % initial guess based on no-blur-fit
-    tic
-    Wnb{n}=EMhmm.init_P_dat(0,0,Ddt_init,A_init,p0_init,dat0);    
-    Wnb{n}=EMhmm.MLEconverge(Wnb{n},dat0,MLEargs{:});
+if(do_parfor)
+    parfor n=1:restarts
+        % construct initial model
+        A_init=dirrnd(wA);
+        p0_init=A_init^1000;
+        p0_init=p0_init(1,:);
+        Ddt_init=exp(sort(logDdt(1)+rand(1,2*N-1)*diff(logDdt)));
+        Ddt_init=Ddt_init(1:2:end); % some spread between diffusion constants
+        % simple MLE convergence
+        tconv=tic;
+        Wmle{n}=EMhmm.init_P_dat(tau,R,Ddt_init,A_init,p0_init,dat);
+        %disp(['converging MLE model ' int2str(n)])% ' of ' int2str(restarts) ])
+        W0=Wmle{n};
+        Wmle{n}=EMhmm.MLEconverge(Wmle{n},dat,MLEargs{:});
+        disp(['converged MLE model ' int2str(n) ', ' int2str(size(A_init,1)) ' states, ' num2str(toc(tconv)/60)  ' min.'])% ' of ' int2str(restarts) ])
+        pause(0.1)
+        Wmle{n}.modSearch='mle rnd init';
+        % initial guess based on no-blur-fit
+        tic
+        Wnb{n}=EMhmm.init_P_dat(0,0,Ddt_init,A_init,p0_init,dat0);
+        Wnb{n}=EMhmm.MLEconverge(Wnb{n},dat0,MLEargs{:});
+    end
+else
+    for n=1:restarts
+        % construct initial model
+        A_init=dirrnd(wA);
+        p0_init=A_init^1000;
+        p0_init=p0_init(1,:);
+        Ddt_init=exp(sort(logDdt(1)+rand(1,2*N-1)*diff(logDdt)));
+        Ddt_init=Ddt_init(1:2:end); % some spread between diffusion constants
+        % simple MLE convergence
+        tconv=tic;
+        Wmle{n}=EMhmm.init_P_dat(tau,R,Ddt_init,A_init,p0_init,dat);
+        %disp(['converging MLE model ' int2str(n)])% ' of ' int2str(restarts) ])
+        W0=Wmle{n};
+        Wmle{n}=EMhmm.MLEconverge(Wmle{n},dat,MLEargs{:});
+        disp(['converged MLE model ' int2str(n) ', ' int2str(size(A_init,1)) ' states, ' num2str(toc(tconv)/60)  ' min.'])% ' of ' int2str(restarts) ])
+        pause(0.1)
+        Wmle{n}.modSearch='mle rnd init';
+        % initial guess based on no-blur-fit
+        tic
+        Wnb{n}=EMhmm.init_P_dat(0,0,Ddt_init,A_init,p0_init,dat0);
+        Wnb{n}=EMhmm.MLEconverge(Wnb{n},dat0,MLEargs{:});
+    end
 end
+
 % best MLE fit
 MLElnL=zeros(1,restarts);
 for n=1:restarts
