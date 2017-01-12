@@ -48,7 +48,7 @@ for d=1:W.dim
    xEst(:,d)=ym.*sum(W.S.pst./(1+bvl),2)...
             +dat.x(:,d).*sum(W.S.pst.*bvl./(1+bvl),2);
 end
-xEst(W.end,:)=0;               % make sure there is no position estimate for t=T+1
+xEst(dat.i1,:)=0;               % make sure there is no position estimate for t=T+1
 
 % variance of position estimate
 if(0)

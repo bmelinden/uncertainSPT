@@ -33,11 +33,18 @@ function [dotCoord,dotCov,dotParam,rawParam,dotParVec]=...
 %             convertToOutStruct method+additional fields
 %             dr = distance between refined position and initial guess
 %             logL = MAP fit log(likelihood)
-%             detH = |determinant of logL Hessian|
+%             logLaic = MAP fit log(likelihood) -K (Akaike penalty)
+%             logLlap = MAP fit log(likelihood) -1/2*log|H|+K/2*log(2*pi);
+%                       (Bayesian evidence, Laplace approx.)
+%             opt_converged = 0/1 if converged/not. Criteria: optimization
+%             routing converged with well-behaved invertible Hessian so
+%             that Laplace precision estimate exists.
 % rawParam  : raw fit parameter array, as returned by fminunc; this is the
 %             same format as that of fitParam0
 % dotParVec : fit parameter vector, each row as returned by the second
-%             argument of the convertToOutStruct method.
+%             argument of the convertToOutStruct method (i.e., physically
+%             meaningful parameters, even if those are not used in the
+%             optimization).
 %
 % For spots where the optimization fails, dotCov(t,:)=[inf inf inf]
 %
@@ -56,7 +63,8 @@ dotCov=zeros(size(dotCoord,1),3);
 p0.dr=NaN;             % add refinement displacement
 p0.logL=NaN;
 p0.logLaic=NaN;
-p0.logLbic=NaN;
+p0.logLlap=NaN;
+p0.opt_converged=false;
 dotParam(1:size(dotCoord,1))=p0;
 dotParVec=zeros(size(dotCoord,1),size(v0,2));
 clear p0
@@ -110,8 +118,10 @@ for r=1:size(dotCoord0,1)
     xMAP=x0Spot+lnpMAPdot(1);
     yMAP=y0Spot+lnpMAPdot(2);
     % sanity check
+    opt_converged=true;
     if( exitFlag<=0 || ~isfinite(hessRcond) || hessRcond<10*eps || sum((detTrace<=0))>0)
-        % the there are convergence problems of some kind
+        % then there are convergence problems of some kind
+        opt_converged=false;
         disp('--------------------------------------------------------')
         warning('localization convergence problem or ill-conditioned Hessian:')
         disp(['fminunc exitFlag = ' int2str(exitFlag)])
@@ -179,10 +189,11 @@ for r=1:size(dotCoord0,1)
     dotParam(r).logL=-logLMAP;        
     K=numel(lnpInit);
     dotParam(r).logLaic=dotParam(r).logL-K;
-    dotParam(r).logLbic=dotParam(r).logL-1/2*logDetH+K/2*log(2*pi);
+    dotParam(r).logLlap=dotParam(r).logL-1/2*logDetH+K/2*log(2*pi);
     dotParam(r).dr=dr;	% add refinement displacement
+    dotParam(r).opt_converged=opt_converged; % convergence flag
     
-    if( false && ( dotCov(1,1)<0 || dotCov(2,2)<0 ) )
+    if( false && opt_converged==false )
         % a visual debug block: it seems most fits that encounter this
         % warning are false positives anyway, so the block is not
         % activated.
