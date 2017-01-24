@@ -1,4 +1,9 @@
 function [pSS,ok]=steadyStateFromA(A)
+numStates=size(A,1);
+if(numStates==1)
+    pSS=1;
+    ok=true;
+else
     b=eig(A);
     ok=true;
     if(sum(abs(b-1)<10*eps)>1)
