@@ -6,7 +6,7 @@ function [x,v,s,y,ym]=diffusiveHMM_blur_detach(p0,A,pE,Ddt,tE,locErrG,dim,T,numT
 % v(t,:)  : variance of localization errors in x
 % s(t)    : hidden state sequence
 % y(t,:)  : true positions
-% ym(t,:) : motion-averaged true positions
+% ym(t,:) : motion-averaged true positions (the true localization positions).
 % Motional blur and localization errors are added according to the
 % Michalet&Berglund model with independent Gauyssian noise, whose std are
 % iid random variables.
