@@ -1,4 +1,4 @@
-function [BS,ind] = parameterBootstrap(W,dat,Nbs,dt,display,varargin)
+function [BS,ind,BS2] = parameterBootstrap(W,dat,Nbs,dt,display,varargin)
 % BS = EMhmm.parameterBootstrap(W,dat,Nbs,dt,args)
 % Parameter bootstrap 
 %
@@ -15,6 +15,9 @@ function [BS,ind] = parameterBootstrap(W,dat,Nbs,dt,display,varargin)
 %         is the bootstrap iteration. See EMhmm.parameterEstimate for the
 %         meaning of the fields.
 % ind   : bootstrap indices, one permutation per row.
+% BS2   : another bootstrap struct, with parameters from the 2-state
+%         collapsed model using the diffusion threshold (only if
+%         '2state',Dthr is given).
 % ML 2016-08-19
 
 
@@ -56,16 +59,27 @@ Pargs={};
 if(nargin>5) % the additional arguments are present
     Pargs=varargin;
 end
-BS=EMhmm.parameterEstimate(W,dt,Pargs{:});
-
+[BS,BS2]=EMhmm.parameterEstimate(W,dt,Pargs{:});
+% initialize
 f=fieldnames(BS);
 ind=zeros(Nbs,length(W.i0));
 for v=1:length(f)
     [rows,cols]=size(BS.(f{v}));
     BS.(f{v})=zeros(rows,cols,Nbs);
 end
-
 P=cell(1,Nbs);
+if(isempty(BS2))
+    do2state=false;
+else
+    do2state=true;
+    f2=fieldnames(BS2);
+    for v=1:length(f2)
+        [rows,cols]=size(BS2.(f2{v}));
+        BS2.(f2{v})=zeros(rows,cols,Nbs);
+    end
+    P2=cell(1,Nbs);
+end
+
 disp(['Converging ' int2str(Nbs) ' bootstrap replicas.'])
 parfor k=1:Nbs
 %for k=1:Nbs
@@ -73,9 +87,12 @@ parfor k=1:Nbs
     % resample and recoverge
     [Xb,Wb,trj]=EMhmm.reorder_trj(dat,W);
     Wb=EMhmm.MLEconverge(Wb,Xb,'display',0);
-    P{k}=EMhmm.parameterEstimate(Wb,dt,Pargs{:});    
+    if(do2state)
+        [P{k},P2{k}]=EMhmm.parameterEstimate(Wb,dt,Pargs{:});
+    else
+        P{k}=EMhmm.parameterEstimate(Wb,dt,Pargs{:});
+    end
     ind(k,:)=trj;
-    %fprintf(' %d ',k)
     if(display)
         disp(['Converged replica ' int2str(k) ' in ' num2str(toc(t0)) ' s.'])
     end
@@ -84,5 +101,10 @@ disp('Done.')
 for k=1:Nbs
     for v=1:length(f)
         BS.(f{v})(:,:,k)=P{k}.(f{v});
+    end
+    if(do2state)
+        for v=1:length(f2)
+            BS2.(f2{v})(:,:,k)=P2{k}.(f2{v});
+        end
     end
 end
