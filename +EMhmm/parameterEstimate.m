@@ -89,7 +89,7 @@ end
 if(slowFastAggregate)
     iSlow=find(est.D<=Dthr);
     iFast=find(est.D>Dthr);
-    est.isSlow=est.D<=Dthr;
+    est.ag2_isSlow=est.D<=Dthr;
     if(isempty(iSlow) || isempty(iFast) )
         warning('EMhmm.parameterEstimate 2-state coarsegraining: D threshold outside D interval')
         
