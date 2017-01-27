@@ -89,6 +89,16 @@ end
 if(slowFastAggregate)
     iSlow=find(est.D<=Dthr);
     iFast=find(est.D>Dthr);
+    if(isempty(iSlow) || isempty(iFast))
+        warning('Diffusion threshold outside range of diffusion parameters.')
+        est.ag2_D=nan(1,2);
+        est.ag2_p0=nan(1,2);
+        est.ag2_pOcc=nan(1,2);
+        est.ag2_A=nan(2,2);
+        est.ag2_pSS=nan(1,2);
+        est.ag2_dwellSteps=nan(1,2);
+        est.ag2_dwellTime=nan(1,2);       
+    else
 
     est.ag2_D=[est.D(iSlow)*rowNormalize(est.pOcc(iSlow))'  est.D(iFast)*rowNormalize(est.pOcc(iFast))'];
     est.ag2_p0=[sum(est.p0(iSlow))  sum(est.p0(iFast))  ]; 

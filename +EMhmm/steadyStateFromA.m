@@ -4,8 +4,18 @@ if(numStates==1)
     pSS=1;
     ok=true;
 else
-    b=eig(A);
-    ok=true;
+    try
+        b=eig(A);
+        ok=true;
+    catch me
+       warning('Steady state could not be computed')
+       me
+       disp('transition matrix A=')
+       disp(nm2str(A))
+       pSS=nan(1,size(A,1));
+       ok=false;
+       return       
+    end
     if(sum(abs(b-1)<10*eps)>1)
         warning('Steady state possibly not unique.')
         ok=false;
