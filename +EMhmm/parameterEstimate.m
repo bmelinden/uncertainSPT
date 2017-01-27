@@ -121,7 +121,5 @@ if(slowFastAggregate)
        disp('A=')
        disp(num2str(W.P.A))
     end
-
-
 end
 end

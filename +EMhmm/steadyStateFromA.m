@@ -4,8 +4,17 @@ if(numStates==1)
     pSS=1;
     ok=true;
 else
-    b=eig(A);
-    ok=true;
+    try
+        b=eig(A);
+        ok=true;
+    catch me
+       warning('Steady state could not be computed')
+       me
+       disp('A = ')
+       disp(num2str(A,3))
+       pSS=nan(1,size(A,1));
+       return
+    end
     if(sum(abs(b-1)<10*eps)>1)
         warning('Steady state possibly not unique.')
         ok=false;
