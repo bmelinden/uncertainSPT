@@ -21,7 +21,7 @@ If you use this code, please cite our work [2].
 tracking. Phys. Rev. E 82, 11917. doi: 10.1103/PhysRevE.82.011917
 
 2. Certain uncertainty: using pointwise error estimates in
-super-resolution microscopy, Martin Lindén, Vladimir Ćurić, Elias
+localization microscopy, Martin Lindén, Vladimir Ćurić, Elias
 Amselem, Johan Elf, e-print: arXiv:1607.04675 [physics.bio-ph]
 ======================================================================
 Copyright (C) 2016 Martin Lindén and Johan Elf
