@@ -1,4 +1,5 @@
 function Y=listToCells(dat,X)
+% Y=listToCells(dat,X)
 % split a vector reprepresentation, such as W.Y.myU or the sMaxP or Viterbi
 % state output, into a cell vector, where the cells have the same size as
 % the input trajectories.
