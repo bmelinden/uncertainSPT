@@ -78,7 +78,7 @@ plot(D1,'b')
 plot(D2,'r')
 plot(D3,'g--')
 
-legend('truth','parameter init','model search','ground truth init')
+legend('truth','parameter init','model search','ground truth init','location','best')
 xlabel('frame')
 ylabel('D [\mum^2/2]')
 
