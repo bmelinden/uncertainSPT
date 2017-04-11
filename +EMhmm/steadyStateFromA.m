@@ -10,10 +10,11 @@ else
     catch me
        warning('Steady state could not be computed')
        me
-       disp('A = ')
-       disp(num2str(A,3))
+       disp('transition matrix A=')
+       disp(nm2str(A))
        pSS=nan(1,size(A,1));
-       return
+       ok=false;
+       return       
     end
     if(sum(abs(b-1)<10*eps)>1)
         warning('Steady state possibly not unique.')
