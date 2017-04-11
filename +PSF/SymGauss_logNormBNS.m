@@ -3,7 +3,7 @@ classdef SymGauss_logNormBNS < PSF.SymGauss
     % intensity B, spot amplitude N, and PSF width S all have log-normal
     % priors: if B has location parameter lnB0 and scale parameter lnBstd,
     % then 
-    % <ln B> = lnB0, Std(ln B) lnBstd, <B> = exp(lnB0+lnBstd^2/2),
+    % <ln B> = lnB0, Std(ln B) = lnBstd, <B> = exp(lnB0+lnBstd^2/2),
     % Std(B) = exp(lnB0+lnBstd^2/2)*sqrt(exp(lnBstd^2)-1),
     % see https://en.wikipedia.org/wiki/Log-normal_distribution.
     %
