@@ -14,16 +14,15 @@ sigmaRead=20;
 ROIwidth=9;
 Nquad=5;
 
-
-PSFname='SymGauss_logNormB_logSkewNormS';
-% 'initialGuess',[mux muy lnB lnN lnS],'priorParameters',[lnB0 lnBstd lnS0 lnSstd lnSa]
-PSFparam={'initialGuess',[0 0 log([1 100 1.5])],...
-        'priorParameters',[log(0.8) 1 log(1.5) 1 5]};
-PsglnNlnS=PSF.(PSFname)(PSFparam{:});
+% MLE 
 PsgMLE=PSF.SymGauss_MLE('initialGuess',[0 0 log([1 100 1.5])],'priorParameters',[]);
+PagMLE=PSF.AsymGauss_angle_MLE('initialGuess',[0 0 log([1 100 1.25 1.75]) 0],'priorParameters',[]);
 
-PasglnN=PSF.AsymGauss_angle_logNormB('initialGuess',[0 0 log([1 100 1.25 1.75]) 0],'priorParameters',[log(0.8) 1]);
-PasgMLE=PSF.AsymGauss_angle_MLE('initialGuess',[0 0 log([1 100 1.25 1.75]) 0],'priorParameters',[]);
+% MAP
+PsgMAP=PSF.SymGaussS0_logNormBN_expS0('initialGuess',[0 0 log([1 100 0.1])],...
+            'priorParameters',[0 log(30) log(200) inf 1],'NA',1.4,'lambda',639/80); % wavelength 639 nm, px size 80 nm
+PagMAP=PSF.AsymGaussS0_BNlnN_expS0('initialGuess',[0 0 log([1 100 0.75 0.5]) 0],...
+            'priorParameters',[0 2 2 2 1],'NA',1.4,'lambda',639/80);
 
 % indata: this is a simulated movie, and thus we use the known true
 % positions instead of spot detection to create an initial guess
@@ -87,14 +86,14 @@ for frame=1:size(MV,3)
         % symmetric Gaussian, MAP fit
         t0=tic;
         [frameCoord,frameCov,framePar]=EMCCDfit.refineSingleFrame(...
-            frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,PsglnNlnS);
+            frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,PsgMAP);
         fitTime(1)=fitTime(1)+toc(t0);
         
         coord_sg_MAP(ind,:)=frameCoord; % save frame number
         param_sg_MAP(ind)=framePar;
         xyCov_sg_MAP(ind,:)=frameCov;
         
-        % symmetric Gaussian, no prior
+        % symmetric Gaussian, MLE fit
         t0=tic;
          [frameCoord,frameCov,framePar]=EMCCDfit.refineSingleFrame(...
             frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,PsgMLE);
@@ -107,7 +106,7 @@ for frame=1:size(MV,3)
         % asymmetric Gaussian, MAP fit
         t0=tic;
         [frameCoord,frameCov,framePar]=EMCCDfit.refineSingleFrame(...
-            frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,PasglnN);
+            frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,PagMAP);
         fitTime(3)=fitTime(3)+toc(t0);
 
         coord_ag_MAP(ind,:)=frameCoord; % save frame number
@@ -117,7 +116,7 @@ for frame=1:size(MV,3)
         % asymmetric Gaussian, MLE fit
         t0=tic;
         [frameCoord,frameCov,framePar]=EMCCDfit.refineSingleFrame(...
-            frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,PasgMLE);
+            frameCoord0,currentFluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,PagMLE);
         fitTime(4)=fitTime(4)+toc(t0);
 
         coord_ag_MLE(ind,:)=frameCoord; % save frame number
@@ -153,8 +152,8 @@ MLExCRLB= 2*s2a./N.*(1+4*tt+sqrt(2*tt./(1+4*tt)));
 %% compare estimated RMS uncertainties
 figure(1)
 clf
+subplot(2,1,1)
 hold on
-
 plot(sqrt(xyCov_sg_MAP(:,1)),'-b')
 plot(sqrt(xyCov_sg_MLE(:,1)),'-r')
 plot(sqrt(MAPxCRLB),'b.')
@@ -164,6 +163,18 @@ ylabel('Laplace uncertainty [px]')
 legend('MAP Laplace','MLE Laplace','MAP CRLB','MLE CRLB')
 title('symmetric Gauss uncertainty')
 box on
+
+subplot(2,1,2)
+hold on
+plot(sqrt(xyCov_ag_MAP(:,1)),'-b')
+plot(sqrt(xyCov_ag_MLE(:,1)),'-r')
+xlabel('frame')
+ylabel('Laplace uncertainty [px]')
+legend('MAP Laplace','MLE Laplace')
+title('asymmetric Gauss uncertainty')
+box on
+
+
 ind=find(sqrt(xyCov_ag_MLE(:,1))<=2*a);
 
 disp('Error and uncertainties (excluding points with est. Laplace uncert. >2 px) :')

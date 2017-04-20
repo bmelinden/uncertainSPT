@@ -60,8 +60,8 @@ classdef SymGaussS0 < PSF.PSFmodel
                 dEdp(:,:,2)=-(muY-yy).*NEexp/S2; % dE_dmuY 
                 dEdp(:,:,3)=ones(size(E))*B; % dE_dlnBG
                 dEdp(:,:,4)= NEexp; % dE_dlnN 
-                %dEdp(:,:,5)= NEexp.*(-2+((muX-xx).^2+(muY-yy).^2)/S2); % dE_dlndS 
-                error('derivative wrt lndS not implemented yet')
+                dEdp(:,:,5)= NEexp.*(-2+((muX-xx).^2+(muY-yy).^2)/S2)/S*(S-this.S0); % dE_dlndS 
+                %%%error('derivative wrt lndS not implemented yet')
                 % compute parameter dependent pixel intensities for symmetric Gaussian, with derivatives
                 % ML 2015-11-17 : partial derivatives validated, except for
                 % the new offset width.
