@@ -65,6 +65,7 @@ p0.logL=NaN;
 p0.logLaic=NaN;
 p0.logLlap=NaN;
 p0.opt_converged=false;
+p0.tFit=0;
 dotParam(1:size(dotCoord,1))=p0;
 dotParVec=zeros(size(dotCoord,1),size(v0,2));
 clear p0
@@ -73,7 +74,7 @@ fminOpt = optimoptions(EMCCDfit.pointOptimization.fminuncDefault,...
     'TolX',1e-6,'MaxIter',500,'TolFun',1e-6,'MaxFunEvals',10000,'Display','notify' );
 
 for r=1:size(dotCoord0,1)
-    tic
+    ticCoord=tic;
     % construct ROI for localization
     x0   =dotCoord0(r,1);
     y0   =dotCoord0(r,2);    
@@ -192,7 +193,7 @@ for r=1:size(dotCoord0,1)
     dotParam(r).logLlap=dotParam(r).logL-1/2*logDetH+K/2*log(2*pi);
     dotParam(r).dr=dr;	% add refinement displacement
     dotParam(r).opt_converged=opt_converged; % convergence flag
-    
+    dotParam(r).tFit=toc(ticCoord);
     if( false && opt_converged==false )
         % a visual debug block: it seems most fits that encounter this
         % warning are false positives anyway, so the block is not
