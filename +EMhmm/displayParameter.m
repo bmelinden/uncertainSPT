@@ -1,5 +1,5 @@
-function displayParameter(Pmle,ncd,Dscale)
-% EMhmm.displayParameter(Pmle,ncd,Dscale)
+function displayParameter(Pmle,ncd,Dscale,ro)
+% EMhmm.displayParameter(Pmle,ncd,Dscale,ro)
 %
 % Displays EMhmm model parameters.
 % 
@@ -11,6 +11,8 @@ function displayParameter(Pmle,ncd,Dscale)
 % Dscale: rescale units of step variance (e.g., Dscale=1e-6 to convert 
 %         nm^2/s to um^2/s), affects lambda and all variables ending in D.
 %         Default 1.
+% ro    : optional true/false indicator for restricted output of only D,
+%         pOcc, and mean dwell times (default: false)
 %
 % ML 2017-01-27
  
@@ -50,6 +52,11 @@ if( ~exist('Dscale','var') || isempty(Dscale) )
 end
 
 f=fieldnames(Pmle);
+% check for restricted output
+if( exist('ro','var') && ~isempty(ro) && ro)
+    f=f(ismember(f,{'D','pOcc','dwellTime'}));
+end
+
 varLength=1;
 for k=1:length(f)
     varLength=max(varLength,length(f{k}));

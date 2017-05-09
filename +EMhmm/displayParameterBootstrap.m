@@ -1,5 +1,5 @@
-function displayParameterBootstrap(Pmle,BS,ncd,Dscale)
-% EMhmm.displayParameterBootstrap(Pmle,BS,ncd,Dscale)
+function displayParameterBootstrap(Pmle,BS,ncd,Dscale,ro)
+% EMhmm.displayParameterBootstrap(Pmle,BS,ncd,Dscale,ro)
 %
 % Displays parameter +- bootstrap std. err. For parameters and their
 % meaning, see EMhmm.
@@ -14,6 +14,8 @@ function displayParameterBootstrap(Pmle,BS,ncd,Dscale)
 % Dscale: rescale units of step variance (e.g., Dscale=1e-6 to convert 
 %         nm^2/s to um^2/s), affects lambda and all variables ending in D.
 %         Default 1.
+% ro    : optional true/false indicator for restricted output of only D,
+%         pOcc, and mean dwell times (default: false)
 %
 % ML 2016-08-19
  
@@ -22,7 +24,7 @@ function displayParameterBootstrap(Pmle,BS,ncd,Dscale)
 % displayParameterBootstrap, display parameters of diffusive HMM
 % =========================================================================
 % 
-% Copyright (C) 2016 Martin Lindén
+% Copyright (C) 2016-2017 Martin Lindén
 % 
 % E-mail: bmelinden@gmail.com
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -44,6 +46,7 @@ function displayParameterBootstrap(Pmle,BS,ncd,Dscale)
 % You should have received a copy of the GNU General Public License along
 % with this program. If not, see <http://www.gnu.org/licenses/>.
 
+%% real code
 
 if( ~exist('ncd','var') || isempty(ncd) )
     ncd=[6 3];
@@ -51,6 +54,7 @@ end
 if( ~exist('Dscale','var') || isempty(Dscale) )
     Dscale=1;
 end
+
 if( ~exist('Pmle','var') || isempty(Pmle) )
     % then use mean value over the bootstrap replicas
     f=fieldnames(BS);
@@ -61,8 +65,12 @@ if( ~exist('Pmle','var') || isempty(Pmle) )
     end
 end
 
-
 f=fieldnames(Pmle);
+% check for restricted output
+if( exist('ro','var') && ~isempty(ro) && ro)
+    f=f(ismember(f,{'D','pOcc','dwellTime'}));
+end
+
 varLength=1;
 for k=1:length(f)
     varLength=max(varLength,length(f{k}));
