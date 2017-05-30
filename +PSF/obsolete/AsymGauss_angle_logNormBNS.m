@@ -1,7 +1,6 @@
 classdef AsymGauss_angle_logNormBNS < PSF.AsymGauss_angle
-    % An asymmetric Gaussian PSF model (see AsymGauss_angle) where all
-    % shape parameters (background B, amplitude N, psf widths S1,S2) except
-    % the asymmetry orientation angle have log-normal priors. A log-normal
+    % An asymmetric Gaussian PSF model (see AsymGauss_angle) where
+    % background B and amplitude N have log-normal priors. A log-normal 
     % distribution with location parameter lnB0 and scale parameter lnBstd,
     % has 
     % <ln B> = lnB0, Std(ln B) lnBstd, <B> = exp(lnB0+lnBstd^2/2),
@@ -10,12 +9,12 @@ classdef AsymGauss_angle_logNormBNS < PSF.AsymGauss_angle
     %
     % Construction:
     % P = SymGauss_logNormBNS(...
-    %   'priorParameters',[lnB0 lnBstd lnN0 lnNstd lnS0 lnSstd],...
+    %   'priorParameters',[lnB0 lnBstd lnN0 lnNstd],...
     %   'initialGuess',[mux muy lnB lnN lnS1 lnS2 v]
     % (The initial guess is passed on to the AsymGauss constructor.)
     % Note that both psf width S1,S2 have the same prior parameters
     properties (Constant)
-        priorName='log-normal background';
+        priorName='log-normal parameters';
     end
     properties
         priorParameters	=[];
@@ -28,9 +27,9 @@ classdef AsymGauss_angle_logNormBNS < PSF.AsymGauss_angle
             this@PSF.AsymGauss_angle(varargin{:});
             % sanity check on prior parameters
             if(numel(this.priorParameters)~=6)
-                error('PSF.AsymGauss_angle_logNormBNS needs priorParameters=[lnB0 lnBstd lnN0 lnNstd lnS0 lnSstd]')
+                error('PSF.AsymGauss_angle_logNormBNS needs priorParameters=[lnB0 lnBstd lnN0 lnNstd]')
             end
-            if( ~isempty(find(this.priorParameters(2:2:6) <=0,1)) )
+            if( ~isempty(find(this.priorParameters([2 4]) <=0,1)) )
                 error('PSF.AsymGauss_angle_logNormBNS needs positive scale parameters lnBstd lnNstd lnSstd.')
             end
         end
@@ -60,14 +59,6 @@ classdef AsymGauss_angle_logNormBNS < PSF.AsymGauss_angle
            dy(4)=- (lnN - lnN0)./lnNvar;
            dy(5)=- (lnS1 - lnS0)./lnSvar;
            dy(6)=- (lnS2 - lnS0)./lnSvar;
-        end
-        
-        % check that the prior parameters are correct size
-        function flag = hasValidPrior(this)
-            flag=true;
-            if(numel(this.priorParameters) ~=2 )
-                flag=false;
-            end          
-        end
+        end        
     end    
 end

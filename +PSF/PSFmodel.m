@@ -25,7 +25,7 @@ classdef (Abstract) PSFmodel
     methods (Abstract, Access = public)
         % convert fit parameters to a struct form: this should be
         % overloaded by the subclass defining the PSF model
-        outStruct = convertToOutStruct(this,inPar, inStruct)
+        [outStruct,outPar] = convertToOutStruct(this,inPar, inStruct)
         [E,gradE] = psfDensity(this,x,y,param)
         [lnL0,dlnL0dp]= logPrior(this,param)  
     end

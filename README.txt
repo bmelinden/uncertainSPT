@@ -10,7 +10,7 @@ and
 2) EMhmm, a variational EM algorithm that performs maximum likelihood
 inference in a diffusive hidden Markov model, where both motion blur
 and localization uncertainty are included in the model, through an
-extension of the Berlund model for single-state diffusion [1].
+extension of the Berglund model for single-state diffusion [1].
 
 The code runs on matlab, with some inner loops implemented in
 C/C++. Binaries for 64 bit linux and max OS are included.
@@ -21,7 +21,7 @@ If you use this code, please cite our work [2].
 tracking. Phys. Rev. E 82, 11917. doi: 10.1103/PhysRevE.82.011917
 
 2. Certain uncertainty: using pointwise error estimates in
-super-resolution microscopy, Martin Lindén, Vladimir Ćurić, Elias
+localization microscopy, Martin Lindén, Vladimir Ćurić, Elias
 Amselem, Johan Elf, e-print: arXiv:1607.04675 [physics.bio-ph]
 ======================================================================
 Copyright (C) 2016 Martin Lindén and Johan Elf
@@ -38,10 +38,12 @@ General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-This product includes code developed by Jan-Willem van de Meent (in
-external/), and Fredrik Persson (in +EMCCDfit/), see copyright in
-individual files.
+=====================================================================
+This product includes code developed by others, see copyright in
+individual files:
+dirrnd.m, dirpdf.m by Jan-Willem van de Meent (in tools/)
+ML_loadStack2.m, by Fredrik Person (in +EMCCDfit/)
+HMMcore/, by Martin Lindén
 =====================================================================
 ---------------------------------------------------------------------
 EMCCDfit contents

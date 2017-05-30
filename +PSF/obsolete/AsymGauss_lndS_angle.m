@@ -1,35 +1,49 @@
-classdef AsymGauss_angle < PSF.PSFmodel
-    % Asymmetric Gaussian PSF model described by parameters
-    % p=[ muX muY lnB lnN lnS1 lnS2 v], and with density
+classdef AsymGauss_lndS_angle < PSF.PSFmodel
+    % Asymmetric Gaussian PSF model with PSF width offset, described by
+    % parameters p=[ muX muY lnB lnN lndS1 lndS2 v], and spot density
     %
     % E = B + N/2/pi/S1/S2*exp(
     %           -0.5*( cos(v)*(xx-muX)+sin(v)*(yy-muY))^2/S1^2
     %           -0.5*(-sin(v)*(xx-muX)+cos(v)*(yy-muY))^2/S2^2),
     %
-    % where B=exp(lnB), N=exp(lnN), S1=exp(lnS1), S2=exp(lnS2), and v
-    % is an angle in radians. The model can also compute derivatives wrt
-    % the parameters.
+    % where B=exp(lnB), N=exp(lnN), S1=S0+exp(lnS1), S2=S0+exp(lnS2), and v
+    % is an angle in radians. The minimum PSF width S0 is either given
+    % directly, or in terms of lambda and NA, S0=0.21*lambda/NA.
+    %
+    % Note: this model is different from that of SymGaussS0, in that S0 is
+    % just an offset, not an overall length scale.
+    %
+    % The model can also compute derivatives wrt the parameters.
     %
     % Note that this is a continuous model, so that exp(lnB) is the
-    % background intensity per unit area, not per pixel. (However, when
+    % background intensity per unit area, not per pixel. (However, when 
     % doing math in pixel units the area per pixel is 1, and then this does
     % not matter.)
     
     properties (Constant)
-        modelName = 'Asymmetric Gaussian, log(B,N,S1,S2) ,angle';
+        modelName = 'Asymmetric Gaussian, log(B,N,dS1,dS2) ,angle';
     end
     properties
         initialGuess=[];
+        lambda=[];
+        NA=[];
+        S0=[];
     end
     methods (Access = public)
         % Constructor, requires a name-value pair
         % 'initialGuess',[ muX muY lnB lnN lnS1 lnS2 v ]
-        function this= AsymGauss_angle(varargin)
+        function this= AsymGauss_lndS_angle(varargin)
             this@PSF.PSFmodel(varargin{:});
             % sanity check for initialGuess
             if(numel(this.initialGuess)~=7)
                 error('AsymGauss_angle needs 7 initialGuess elements')
             end
+            if( ~isempty(this.NA) && ~isempty(this.lambda))
+                this.S0=0.21*this.lambda/this.NA;
+            elseif(isempty(this.S0))
+                error('AsymGauss_lndS_angle must be initialized with either NA,lambda or S0.')
+            end
+
         end
         
         % PSFmodel functions in this class level
@@ -39,21 +53,22 @@ classdef AsymGauss_angle < PSF.PSFmodel
             muY=param(2);
             lnB=param(3);
             lnN=param(4);
-            lnS1=param(5);
-            lnS2=param(6);
+            lndS1=param(5);
+            lndS2=param(6);
             v=param(7);
             
-            sig1=exp(lnS1);
-            sig2=exp(lnS2);
+            sig1=this.S0+exp(lndS1);
+            sig2=this.S0+exp(lndS2);
             c =cos(v);
             s =sin(v);
             dx=xx-muX;
             dy=yy-muY;
             
-            NEexp=1/2/pi*exp(lnN-lnS1-lnS2-1/2*(((c*dx+s*dy)/sig1).^2+((-s*dx+c*dy)/sig2).^2));
+            NEexp=1/2/pi*exp(lnN-lndS1-lndS2-1/2*(((c*dx+s*dy)/sig1).^2+((-s*dx+c*dy)/sig2).^2));
             E=NEexp+exp(lnB);
             
             % ML: derivatives verified numerically 2016-05-31
+            % ML: derivatives wrt lndS1,2 verified numerically 2016-11-08
             if(nargout>1)
                 dEdp=zeros(size(E,1),size(E,2),7);
                 dEdp(:,:,1)=NEexp.*( c/sig1^2*(c*dx+s*dy)-s/sig2^2*(-s*dx+c*dy));% dE_dmuX
@@ -93,8 +108,8 @@ classdef AsymGauss_angle < PSF.PSFmodel
             
             B=exp(inPar(3));
             N=exp(inPar(4));
-            S1=exp(inPar(5));
-            S2=exp(inPar(6));
+            S1=this.S0+exp(inPar(5));
+            S2=this.S0+exp(inPar(6));
             v=inPar(7);
             
             % make the angle refer to the largest principal direction?

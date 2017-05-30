@@ -40,13 +40,5 @@ classdef AsymGauss_angle_logNormB < PSF.AsymGauss_angle
            dy=zeros(size(param));
            dy(3)=- (lnB - lnB0)./(lnBstd^2);
         end
-        
-        % check that the prior parameters are correct size
-        function flag = hasValidPrior(this)
-            flag=true;
-            if(numel(this.priorParameters) ~=2 )
-                flag=false;
-            end          
-        end
     end    
 end

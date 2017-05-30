@@ -1,8 +1,8 @@
-function [dotCoord,dotCov,dotParam,rawParam]=...
+function [dotCoord,dotCov,dotParam,rawParam,dotParVec]=...
     refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,logLobj,psfObj,fitParam0,saveError)
-% [dotCoord,dotCov,dotParam,rawParam]=...
+% [dotCoord,dotCov,dotParam,rawParam,dotParVec]=...
 %    refineSingleFrame(dotCoord0,fluoFrame,fluoOffset,ROIwidth,Nquad,...
-%    logLobj,psfObj,fitParam0,saveError)
+%                                       logLobj,psfObj,fitParam0,saveError)
 %
 % attempt MAP fit of the suggested dots in dotCoord0 to a single
 % fluorescent image fluoFrame, with mean offset fluoOffset.
@@ -30,12 +30,21 @@ function [dotCoord,dotCov,dotParam,rawParam]=...
 % dotCov    : position covariances, dotCov(t,:)= [varX covXY varY],
 %             from a Laplace approximation.
 % dotParam  : a parameter struct array, with fields specified by the
-%             psf2param function+additional fields
+%             convertToOutStruct method+additional fields
 %             dr = distance between refined position and initial guess
 %             logL = MAP fit log(likelihood)
-%             detH = |determinant of logL Hessian|
+%             logLaic = MAP fit log(likelihood) -K (Akaike penalty)
+%             logLlap = MAP fit log(likelihood) -1/2*log|H|+K/2*log(2*pi);
+%                       (Bayesian evidence, Laplace approx.)
+%             opt_converged = 0/1 if converged/not. Criteria: optimization
+%             routing converged with well-behaved invertible Hessian so
+%             that Laplace precision estimate exists.
 % rawParam  : raw fit parameter array, as returned by fminunc; this is the
 %             same format as that of fitParam0
+% dotParVec : fit parameter vector, each row as returned by the second
+%             argument of the convertToOutStruct method (i.e., physically
+%             meaningful parameters, even if those are not used in the
+%             optimization).
 %
 % For spots where the optimization fails, dotCov(t,:)=[inf inf inf]
 %
@@ -50,19 +59,22 @@ end
 
 dotCoord=dotCoord0;
 dotCov=zeros(size(dotCoord,1),3);
-p0=psfObj.convertToOutStruct(psfObj.initialGuess,struct);
+[p0,v0]=psfObj.convertToOutStruct(psfObj.initialGuess,struct);
 p0.dr=NaN;             % add refinement displacement
 p0.logL=NaN;
 p0.logLaic=NaN;
-p0.logLbic=NaN;
+p0.logLlap=NaN;
+p0.opt_converged=false;
+p0.tFit=0;
 dotParam(1:size(dotCoord,1))=p0;
+dotParVec=zeros(size(dotCoord,1),size(v0,2));
 clear p0
 
 fminOpt = optimoptions(EMCCDfit.pointOptimization.fminuncDefault,...
     'TolX',1e-6,'MaxIter',500,'TolFun',1e-6,'MaxFunEvals',10000,'Display','notify' );
 
 for r=1:size(dotCoord0,1)
-    tic
+    ticCoord=tic;
     % construct ROI for localization
     x0   =dotCoord0(r,1);
     y0   =dotCoord0(r,2);    
@@ -84,8 +96,7 @@ for r=1:size(dotCoord0,1)
     end
     rawParam(r,:)=lnpInit;
     try
-        [lnpMAPdot,logLMAP,exitFlag,~,~,hessianMAP] = ...
-            fminunc(@MAPobj.minus_lnL,lnpInit,fminOpt);
+        [lnpMAPdot,logLMAP,exitFlag,~,~,hessianMAP] =fminunc(@MAPobj.minus_lnL,lnpInit,fminOpt);
         covMAP=inv(hessianMAP); % numerical covariance matrix
         hessRcond=rcond(hessianMAP);
         detTrace=[det(covMAP(1:2,1:2)) trace(covMAP(1:2,1:2))];
@@ -108,8 +119,10 @@ for r=1:size(dotCoord0,1)
     xMAP=x0Spot+lnpMAPdot(1);
     yMAP=y0Spot+lnpMAPdot(2);
     % sanity check
+    opt_converged=true;
     if( exitFlag<=0 || ~isfinite(hessRcond) || hessRcond<10*eps || sum((detTrace<=0))>0)
-        % the there are convergence problems of some kind
+        % then there are convergence problems of some kind
+        opt_converged=false;
         disp('--------------------------------------------------------')
         warning('localization convergence problem or ill-conditioned Hessian:')
         disp(['fminunc exitFlag = ' int2str(exitFlag)])
@@ -122,10 +135,15 @@ for r=1:size(dotCoord0,1)
         psfObj
         disp('--------------------------------------------------------')
         if(saveError)
-            errFile=sprintf('errLog_refineSingleFrame_%09d.mat',round(1e9*rand));
+            if(exist('errLogs','dir')==7 || mkdir('errLogs'))
+                errFile=sprintf('errLogs%serrLog_refineSingleFrame_%09d.mat',filesep,round(1e9*rand));
+            else
+                errFile=sprintf('errLog_refineSingleFrame_%09d.mat',round(1e9*rand));
+            end
             save(errFile)
         end
         if(0)% a visual debug block to visualize data and failed fits
+            %% the visualization block
             figure(13)
             clf
             subplot(2,1,1)
@@ -148,7 +166,7 @@ for r=1:size(dotCoord0,1)
             
             subplot(2,2,4)
             hold on
-            Emodel=MAPobj.psfModel(lnpMAPdot);
+            Emodel=MAPobj.intensityModel(lnpMAPdot);
             imagesc(Emodel*logLobj.EMgain+bgROI)
             plot(lnpMAPdot(1),lnpMAPdot(2),'ro')
             plot(lnpInit(1),lnpInit(2),'gs')
@@ -165,16 +183,18 @@ for r=1:size(dotCoord0,1)
     end
     dotCoord(r,1:2)=[xMAP yMAP];
     dotCov(r,:)=[covMAP(1,1) covMAP(1,2) covMAP(2,2)];
-    dotParam(r) = psfObj.convertToOutStruct(lnpMAPdot,dotParam(r));
+    [dotParam(r),dotParVec(r,:)] = psfObj.convertToOutStruct(lnpMAPdot,dotParam(r));
+    
     
     dr=norm(dotCoord(r,1:2)-dotCoord0(r,1:2));
     dotParam(r).logL=-logLMAP;        
     K=numel(lnpInit);
     dotParam(r).logLaic=dotParam(r).logL-K;
-    dotParam(r).logLbic=dotParam(r).logL-1/2*logDetH+K/2*log(2*pi);
+    dotParam(r).logLlap=dotParam(r).logL-1/2*logDetH+K/2*log(2*pi);
     dotParam(r).dr=dr;	% add refinement displacement
-    
-    if( false && ( dotCov(1,1)<0 || dotCov(2,2)<0 ) )
+    dotParam(r).opt_converged=opt_converged; % convergence flag
+    dotParam(r).tFit=toc(ticCoord);
+    if( false && opt_converged==false )
         % a visual debug block: it seems most fits that encounter this
         % warning are false positives anyway, so the block is not
         % activated.
