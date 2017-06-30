@@ -6,7 +6,6 @@ function [W,sMaxP,sVit,WS]=hiddenStateUpdate(W,dat)
 % sMAxP and sVit are only computed if asked for by output arguments.
 % WS : struct containing the whole workspace at the end of the function
 % call. Expensive, computed only when asked for.
-
 %% copyright notice
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % EMhmm.hiddenStateUpdate, variational state update for diffusive HMM

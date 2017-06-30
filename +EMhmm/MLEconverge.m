@@ -115,6 +115,7 @@ EMexit=struct;
 EMexit.stopcondition='maxiter';
 % convergence iterations
 lnL0=-inf;
+EMtimer=tic;
 
 converged_lnL=0;
 converged_par=false;
@@ -172,6 +173,7 @@ for r=1:(Nwarmup+maxIter)
         break
     end
 end
+EMexit.time=toc(EMtimer);
 
 % add convergence report to model struct
 EMexit.numiter=r;

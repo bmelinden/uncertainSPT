@@ -1,7 +1,9 @@
-function W=diffusionPathUpdate(W,dat)
+function [W,WS]=diffusionPathUpdate(W,dat)
 % W=diffusionPathUpdate(W,dat)
 % one round of diffusion path update in a diffusive HMM, with possibly
 % missing position data.
+%
+% WS : optional output: workspace at the end of the function
 
 %% copyright notice
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -127,3 +129,9 @@ for k=1:W.dim
     %[sig0(:,k),sig1(:,k),lD(k)]=triSym_triInv_rescale_trjWise_m(L0(:,k),L1(:,k),W.i0,W.i1,numel(W.i0));
 end
 W.Y.MeanLnQ=-sum(W.dim/2*(dat.T+1)*(1+log(2*pi)))+0.5*sum(logDet); % <lnQ(y)>
+if(nargout>=2)
+   fname=['foo_' int2str(ceil(1e5*rand)) '.mat'];
+   save(fname);
+   WS=load(fname);
+   delete(fname);
+end
