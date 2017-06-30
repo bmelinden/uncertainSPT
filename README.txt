@@ -6,7 +6,8 @@ localization uncertainty for single particle tracking and localization
 microscopy.
 1) EMCCDfit, localization algorithms to estimate particle positions
 and localization uncertainty from images aquired by an EMCCD camera,
-and
+1b) EMCCD_dark_count_calibration.m, a calibration routine that extract
+EMCCD parameters from very low light images (<<1 photons/pixel), and
 2) EMhmm, a variational EM algorithm that performs maximum likelihood
 inference in a diffusive hidden Markov model, where both motion blur
 and localization uncertainty are included in the model, through an
@@ -20,9 +21,9 @@ If you use this code, please cite our work [2].
 1. Berglund, A.J. (2010). Statistics of camera-based single-particle
 tracking. Phys. Rev. E 82, 11917. doi: 10.1103/PhysRevE.82.011917
 
-2. Certain uncertainty: using pointwise error estimates in
-localization microscopy, Martin Lindén, Vladimir Ćurić, Elias
-Amselem, Johan Elf, e-print: arXiv:1607.04675 [physics.bio-ph]
+2. Lindén, M., Ćurić, V., Amselem, E., and Elf, J. (2017). Pointwise
+error estimates in localization microscopy. Nat Commun 8, 15115.
+doi: 10.1038/ncomms15115
 ======================================================================
 Copyright (C) 2016 Martin Lindén and Johan Elf
 
