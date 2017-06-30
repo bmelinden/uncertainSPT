@@ -83,6 +83,7 @@ W.Y.MeanLnQ=0;     % entropy of q(y) = <ln q(y)>
 % initialize hidden state field
 W.S=struct;
 W.S.pst=ones(size(dat.x,1),W.N)/W.N;
+W.S.pst(W.i1,:)=0;
 W.S.wA=ones(W.N,W.N);
 
 
