@@ -55,7 +55,7 @@ W.pOcc=zeros(1,W.N);
 W.P=struct; 
 W.P.lambda=2*Ddt_init;
 W.P.A=A_init;
-W.P.p0=p0_init;
+W.P.p0=reshape(p0_init,1,numel(p0_init));
 
 % hidden path subfield, with no Infs or NaNs
 W.Y=struct;
