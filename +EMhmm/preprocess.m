@@ -121,7 +121,7 @@ for k=1:length(X)
 end
 if(hadToPrune) % then warn that pruning took place
     prunedTrjs=union(prunedTrjs(1),prunedTrjs);
-    warning(['vbspt.preprocess shortened trajectories' sprintf(' %d',prunedTrjs) ', to remove missing data in the end or beginning.'])
+    disp(['EMhmm.preprocess shortened trajectories' sprintf(' %d',prunedTrjs) ', to remove missing data in the end or beginning.'])
 end
 
 
@@ -131,7 +131,7 @@ for k=1:length(X)
     T(k)=size(X{k},1);
 end
 if(~isempty(find(T<2,1)))
-   warning('vbspt.preprocess: removing traces with no steps.')
+   disp('EMhmm.preprocess: removing traces with no steps.')
    X=X(T>1);
    varX=varX(T>1);
    T=T(T>1);   
