@@ -3,7 +3,7 @@
 
 % mex -setup C % run this once to choose and setup a C compiler
 
-ff=dir('*.c');
+ff=dir('*.c*');
 
 for k=1:length(ff)
     disp(ff(k).name)
