@@ -124,7 +124,7 @@ for r=1:(Nwarmup+maxIter)
     if(sortModel)
         % sort in order of increasing diffusion constant
         [~,ind]=sort(W.P.lambda);
-        if(prod(ind==sort(ind))==0) % the resort the model
+        if(prod(ind==sort(ind))==0) % then resort the model
             W.P.lambda=W.P.lambda(ind);
             W.P.p0=W.P.p0(ind);
             W.P.A=W.P.A(ind,ind);
