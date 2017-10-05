@@ -5,18 +5,22 @@ uncertainSPT contains two basic software tools to extract and use
 localization uncertainty for single particle tracking and localization
 microscopy.
 1) EMCCDfit, localization algorithms to estimate particle positions
-and localization uncertainty from images aquired by an EMCCD camera,
-1b) EMCCD_dark_count_calibration.m, a calibration routine that extract
-EMCCD parameters from very low light images (<<1 photons/pixel), and
+and localization uncertainty from images aquired by an EMCCD camera.
 2) EMhmm, a variational EM algorithm that performs maximum likelihood
 inference in a diffusive hidden Markov model, where both motion blur
 and localization uncertainty are included in the model, through an
 extension of the Berglund model for single-state diffusion [1].
+3) EMCCD_dark_count_calibration.m, a calibration routine that extract
+EMCCD parameters from very low light images (<<1 photons/pixel). 
+
+NOTE: calibrating with a clodes shutter is sensitive to spurious
+electrons generated in the EM multiplication stage, and may
+systematically underestimate the actual EM gain [3].
 
 The code runs on matlab, with some inner loops implemented in
 C/C++. Binaries for 64 bit linux and max OS are included.
 
-If you use this code, please cite our work [2].
+If you use EMCCDfit or EMhmm, please cite ref. [2].
 
 1. Berglund, A.J. (2010). Statistics of camera-based single-particle
 tracking. Phys. Rev. E 82, 11917. doi: 10.1103/PhysRevE.82.011917
@@ -24,6 +28,12 @@ tracking. Phys. Rev. E 82, 11917. doi: 10.1103/PhysRevE.82.011917
 2. Lindén, M., Ćurić, V., Amselem, E., and Elf, J. (2017). Pointwise
 error estimates in localization microscopy. Nat Commun 8, 15115.
 doi: 10.1038/ncomms15115
+
+3. Avella, A., Ruo-Berchera, I., Degiovanni, I. P., Brida, G. &
+Genovese, M. Absolute calibration of an EMCCD camera by quantum
+correlation, linking photon counting to the analog regime. Optics
+Letters 41, 1841 (2016). doi: 10.1364/OL.41.001841
+
 ======================================================================
 Copyright (C) 2016 Martin Lindén and Johan Elf
 

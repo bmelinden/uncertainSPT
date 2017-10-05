@@ -2,8 +2,14 @@ function [gain,sigRead,offset,dc,F]=EMCCD_dark_count_calibration(IM,gain0,sigRea
 % [gain,sigRead,offset,dc]=EMCCD_dark_count_calibration(IM,gain0,sigRead0,dc0,doPlot)
 % Calibration from dark counts movie, using the high gain approximation
 % with uniform dark current and Gaussian readout noise. The model assumes
-% that the dark current is low, meaning dc<<1. In many cases, such images
-% can be aquired by closing the camera shutter.
+% that the dark current is low, meaning dc<<1. Such images
+  
+% can be aquired by closing the camera shutter, but this procedure may 
+% systematically underestimate the EM gain somewhat due to the generation 
+% of spurious charges in the EM multiplication stage. See
+% Avella et al. Absolute calibration of an EMCCD camera by quantum
+% correlation, linking photon counting to the analog regime. Optics
+% Letters 41, 1841 (2016). doi: 10.1364/OL.41.001841
 %
 % Statistical model: each pixel is modeled as a constant offset, iid
 % Gaussian noise with std sigRead, and (with proibability dc) a
