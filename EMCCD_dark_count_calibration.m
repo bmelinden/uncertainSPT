@@ -113,7 +113,7 @@ disp('starting iterations')
 dPrel=1;
 F=-inf;
 disp('       rms |      gain |      d.c. |    dP/|P| | dlnL/|lnL| |         ')
-while(dPrel>1e-5)
+while(dPrel>1e-4)
     
     % start parameters
     sgq0=[ss gg qq];
