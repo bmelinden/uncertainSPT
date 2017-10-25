@@ -107,7 +107,7 @@ disp('starting iterations')
 dPrel=1;
 F=-inf;
 disp('       rms |      gain |      d.c. |    dP/|P| | dlnL/|lnL| |         ')
-while(dPrel>1e-5)
+while(dPrel>1e-4)
     
     % start parameters
     sgq0=[ss gg qq];
@@ -138,6 +138,11 @@ while(dPrel>1e-5)
         T1=sum(Q,3);
         ck0=sum((1-Q).*IM,3)./T0;
         
+        nNan=sum(isnan(oo(:)));
+        if(nNan>0)
+            oo(isnan(oo))=nanmedian(oo(:));
+            warning('NaN corrected in offset values.')
+        end
         oot=repmat(oo,1,1,size(IM,3));
         % iterative update
         oo1=ck0+T1./T0*ss^2/gg...
@@ -176,7 +181,12 @@ while(dPrel>1e-5)
         sg0=[ss gg];
         sgFun=@(sg)([-1+cmo2_0/sg(1)^2+(sg(1)/sg(2))^2*T1/T0-W1/T0/sg(1)-sg(1)/sg(2)*W2/T0;
             -1-(sg(1)/sg(2))^2+cmo_1/sg(2)+sg(1)/sg(2)*W2/T1  ]);
-        sg1=fsolve(sgFun,sg0,optsol);
+        try
+            sg1=fsolve(sgFun,sg0,optsol);
+        catch me
+            me.message
+            keyboard
+        end
         dsdg=max(abs( (sg1-sg0)./sg1));
         %disp(num2str([sg1 dgds]))
         ss=sg1(1);
