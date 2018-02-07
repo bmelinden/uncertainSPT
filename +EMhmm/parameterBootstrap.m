@@ -1,5 +1,5 @@
 function [BS,ind,BS2] = parameterBootstrap(W,dat,Nbs,dt,display,varargin)
-% BS = EMhmm.parameterBootstrap(W,dat,Nbs,dt,args)
+% [BS,ind,BS2] = EMhmm.parameterBootstrap(W,dat,Nbs,dt,display,args)
 % Parameter bootstrap 
 %
 % W     : input HMM model (recommend converged model)
