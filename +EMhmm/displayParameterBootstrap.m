@@ -94,7 +94,7 @@ for k=1:length(f)
         if( sum(ind) == size(BS.(f{k}),3)) % then all BS replicas are finite
             fprintf('\n')
         else
-            fprintf(' W: non-finite replicas!\n')
+            fprintf(' B.S. NaN!\n')
         end
     end
 end

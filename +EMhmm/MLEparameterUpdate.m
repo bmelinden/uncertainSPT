@@ -1,4 +1,5 @@
 function W=MLEparameterUpdate(W,dat)
+% W=MLEparameterUpdate(W,dat)
 % one round of EM iterations in a diffusive HMM, including handling missing
 % data, and adding conjgate prior fields
 % P0.wA, P0.w0, P0.n, P0.c if the model W has not prior field P0.
