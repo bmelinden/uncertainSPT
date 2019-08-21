@@ -17,6 +17,10 @@ NOTE: calibrating with a clodes shutter is sensitive to spurious
 electrons generated in the EM multiplication stage, and may
 systematically underestimate the actual EM gain [3].
 
+NOTE 2: FOR HMM analysis, we strongly recommend you consider 
+https://github.com/bmelinden/vbSPTu instead, which is faster and more 
+robust.
+
 The code runs on matlab, with some inner loops implemented in
 C/C++. Binaries for 64 bit linux and max OS are included.
 
